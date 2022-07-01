@@ -8,7 +8,7 @@ import java.util.*;
 public class TS_NetworkMACUtils {
 
     public static List<String> getMAC_FromNetworkInterface() {
-        return TGS_UnSafe.execute(() -> {
+        return TGS_UnSafe.compile(() -> {
             List<String> macs = TGS_ListUtils.of();
             var networks = NetworkInterface.getNetworkInterfaces();
             while (networks.hasMoreElements()) {
