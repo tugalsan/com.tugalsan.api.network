@@ -1,6 +1,7 @@
 package com.tugalsan.api.network.server;
 
 import com.tugalsan.api.list.client.*;
+import com.tugalsan.api.unsafe.client.*;
 import java.net.*;
 import java.util.*;
 import java.util.concurrent.*;
@@ -47,8 +48,7 @@ public class TS_NetworkPortUtils {
     }
 
     public static List<Integer> getReachables(CharSequence ip) {
-        try {
-
+        return TGS_UnSafe.compile(() -> {
             List<TaskIsReacable> taskList = TGS_ListUtils.of();
             IntStream.range(MIN_PORT(), MAX_PORT()).forEachOrdered(port -> taskList.add(new TaskIsReacable(ip, port, MAX_TIMEOUT_SEC())));
             var executor = (ExecutorService) Executors.newFixedThreadPool(MAX_THREAD_COUNT());
@@ -66,18 +66,16 @@ public class TS_NetworkPortUtils {
                 }
             });
             return results;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        });
     }
 
     public static boolean isReacable(CharSequence ip, int port, float watchDogSeconds) {
-        try ( var socket = new Socket();) {
-            socket.connect(new InetSocketAddress(ip.toString(), port), Math.round(watchDogSeconds * 1000));
-            return true;
-        } catch (Exception ex) {
-            return false;
-        }
+        return TGS_UnSafe.compile(() -> {
+            try ( var socket = new Socket();) {
+                socket.connect(new InetSocketAddress(ip.toString(), port), Math.round(watchDogSeconds * 1000));
+                return true;
+            }
+        });
     }
 
 }

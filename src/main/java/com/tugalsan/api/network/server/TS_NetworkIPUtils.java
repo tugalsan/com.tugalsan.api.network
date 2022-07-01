@@ -4,6 +4,7 @@ import com.tugalsan.api.list.client.*;
 import com.tugalsan.api.log.server.*;
 import com.tugalsan.api.os.server.*;
 import com.tugalsan.api.string.client.*;
+import com.tugalsan.api.unsafe.client.*;
 import java.net.*;
 import java.util.*;
 import java.util.concurrent.*;
@@ -60,7 +61,7 @@ public class TS_NetworkIPUtils {
     }
 
     public static List<String> getReachables(CharSequence ipClassC) {
-        try {
+        return TGS_UnSafe.compile(() -> {
             List<TaskIsReacable> taskList = TGS_ListUtils.of();
             IntStream.range(MIN_IP(), MAX_IP()).forEachOrdered(ipPartD -> {
                 var ipNext = TGS_StringUtils.concat(ipClassC, ".", String.valueOf(ipPartD));
@@ -71,18 +72,15 @@ public class TS_NetworkIPUtils {
             executor.shutdown();
             List<String> results = TGS_ListUtils.of();
             futures.stream().forEachOrdered(f -> {
-                try {
-                    if (f.get() != null) {
-                        results.add(f.get());
+                TGS_UnSafe.execute(() -> {
+                    if (f.get() == null) {
+                        return;
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                    results.add(f.get());
+                });
             });
             return results;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        });
     }
 
     public static boolean isReacable(CharSequence ipAddress) {
@@ -90,62 +88,51 @@ public class TS_NetworkIPUtils {
     }
 
     public static boolean isReacable(CharSequence ipAddress, int watchDogSeconds) {
-        try {
-            return getByName(ipAddress).isReachable(watchDogSeconds * 1000);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return TGS_UnSafe.compile(() -> getByName(ipAddress).isReachable(watchDogSeconds * 1000));
     }
 
     public static InetAddress getByName(CharSequence ipAddress) {
-        try {
-            return InetAddress.getByName(ipAddress.toString());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return TGS_UnSafe.compile(() -> InetAddress.getByName(ipAddress.toString()));
     }
 
     public static String get_IP_CONFIG_ALL() {//cmd /c netstat
-        if (System.getProperty("os.name").toLowerCase(Locale.ROOT).startsWith("windows")) {
+        var osName = System.getProperty("os.name").toLowerCase(Locale.ROOT);
+        if (osName.startsWith("windows")) {
             return TS_RuntimeUtils.runConsole_readResult("ipconfig /all");
-        } else if (System.getProperty("os.name").toLowerCase(Locale.ROOT).startsWith("linux")) {
-            return TS_RuntimeUtils.runConsole_readResult("ifconfig");
-        } else {
-            throw new RuntimeException("UnknownOs: " + System.getProperty("os.name"));
         }
+        if (osName.startsWith("linux")) {
+            return TS_RuntimeUtils.runConsole_readResult("ifconfig");
+        }
+        return TGS_UnSafe.catchMeIfUCanReturns(d.className, "get_IP_CONFIG_ALL", "UnknownOs: " + System.getProperty("os.name"));
     }
 
     public static String getIPRouter() {
-        try {
+        return TGS_UnSafe.compile(() -> {
             var ip = InetAddress.getLocalHost();
             return ip.getHostAddress();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        });
     }
 
     public static String getIPServer() {
-        try ( var socket = new Socket()) {
-            socket.connect(new InetSocketAddress("google.com", 80));
-            var ip = socket.getLocalAddress().toString();
-            if (ip != null && ip.startsWith("/")) {
-                ip = ip.substring(1);
+        return TGS_UnSafe.compile(() -> {
+            try ( var socket = new Socket()) {
+                socket.connect(new InetSocketAddress("google.com", 80));
+                var ip = socket.getLocalAddress().toString();
+                if (ip != null && ip.startsWith("/")) {
+                    ip = ip.substring(1);
+                }
+                return ip;
             }
-            return ip;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        });
     }
 
     public static String getIPClient(HttpServletRequest request) {
-        try {
+        return TGS_UnSafe.compile(() -> {
             var r = request.getRemoteAddr();
             if (r != null && (r.equals("0:0:0:0:0:0:0:1") || r.equals("127.0.0.1") || r.equals("localhost"))) {
                 r = InetAddress.getLocalHost().getHostAddress();
             }
             return r;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        });
     }
 }
