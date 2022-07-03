@@ -75,6 +75,8 @@ public class TS_NetworkPortUtils {
                 socket.connect(new InetSocketAddress(ip.toString(), port), Math.round(watchDogSeconds * 1000));
                 return true;
             }
+        }, e -> {
+            return false;
         });
     }
 
