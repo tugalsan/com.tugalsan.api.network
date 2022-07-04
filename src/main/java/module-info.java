@@ -4,6 +4,7 @@ module com.tugalsan.api.network {
     requires com.tugalsan.api.unsafe;
     requires com.tugalsan.api.string;
     requires com.tugalsan.api.log;
+    requires com.tugalsan.api.random;
     requires com.tugalsan.api.list;
     requires com.tugalsan.api.executable;
     requires com.tugalsan.api.compiler;

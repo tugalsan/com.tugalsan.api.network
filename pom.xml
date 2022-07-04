@@ -32,6 +32,11 @@
             <artifactId>com.tugalsan.api.list</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>com.tugalsan.api.random</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
     
     <build>
