@@ -56,14 +56,12 @@ public class TS_NetworkPortUtils {
             executor.shutdown();
             List<Integer> results = TGS_ListUtils.of();
             futures.stream().forEachOrdered(f -> {
-                try {
-                    Integer port = f.get();
+                TGS_UnSafe.execute(() -> {
+                    var port = f.get();
                     if (port != null) {
                         results.add(port);
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                });
             });
             return results;
         });

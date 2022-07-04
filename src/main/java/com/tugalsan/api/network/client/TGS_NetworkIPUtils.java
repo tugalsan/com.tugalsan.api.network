@@ -1,5 +1,6 @@
 package com.tugalsan.api.network.client;
 
+import com.tugalsan.api.unsafe.client.*;
 import java.util.*;
 
 public class TGS_NetworkIPUtils {
@@ -12,18 +13,14 @@ public class TGS_NetworkIPUtils {
         if (groups.length != 4) {
             return false;
         }
-        try {
-            return Arrays.stream(groups)
-                    .filter(s -> s.length() > 1 && s.startsWith("0"))
-                    .map(Integer::parseInt)
-                    .filter(i -> (i >= 0 && i <= 255))
-                    .count() == 4;
-        } catch (NumberFormatException e) {
-            return false;
-        }
+        return TGS_UnSafe.compile(() -> Arrays.stream(groups)
+                .filter(s -> s.length() > 1 && s.startsWith("0"))
+                .map(Integer::parseInt)
+                .filter(i -> (i >= 0 && i <= 255))
+                .count() == 4, e -> false);
     }
-    
-     public static boolean isLocalHost(CharSequence domainOrIp) {
+
+    public static boolean isLocalHost(CharSequence domainOrIp) {
         return Objects.equals(domainOrIp, "localhost")
                 || Objects.equals(domainOrIp, "127.0.0.1")
                 || Objects.equals(domainOrIp, "0:0:0:0:0:0:0:1")

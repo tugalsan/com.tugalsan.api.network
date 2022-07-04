@@ -1,13 +1,14 @@
 package com.tugalsan.api.network.server;
 
+import com.tugalsan.api.unsafe.client.*;
 import javax.net.ssl.*;
 import java.security.*;
 import java.security.cert.*;
 
-public class TS_NetworkConnectionUtils {
+public class TS_NetworkSSLUtils {
 
     public static void disableCertificateValidation() {
-        try {
+        TGS_UnSafe.execute(() -> {
             var sc = SSLContext.getInstance("SSL");
             sc.init(null, new TrustManager[]{
                 new X509TrustManager() {
@@ -27,7 +28,6 @@ public class TS_NetworkConnectionUtils {
             }, new SecureRandom());
             HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
             HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
-        } catch (Exception e) {
-        }
+        }, e -> TGS_UnSafe.doNothing());
     }
 }

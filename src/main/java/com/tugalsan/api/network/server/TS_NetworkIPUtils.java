@@ -32,12 +32,10 @@ public class TS_NetworkIPUtils {
     }
 
     public static void logIPServerAndIpRouter() {
-        try {
+        TGS_UnSafe.execute(() -> {
             d.cr("logIPServerAndIpRouter", "getIPServer()", TS_NetworkIPUtils.getIPServer());
             d.cr("logIPServerAndIpRouter", "getIPRouter()", TS_NetworkIPUtils.getIPRouter());
-        } catch (Exception e) {
-            d.ce("logIPServerAndIpRouter", "ERROR: Possibly no internet connection!", e.getMessage());
-        }
+        }, e -> d.ce("logIPServerAndIpRouter", "ERROR: Possibly no internet connection!", e.getMessage()));
     }
 
     private static class TaskIsReacable implements Callable<String> {
