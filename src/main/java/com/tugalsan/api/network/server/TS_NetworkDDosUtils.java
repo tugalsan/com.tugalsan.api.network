@@ -9,7 +9,7 @@ import javax.net.ssl.*;
 
 public class TS_NetworkDDosUtils {
 
-    final private static TS_Log d = new TS_Log(TS_NetworkDDosUtils.class.getSimpleName());
+    final private static TS_Log d = new TS_Log(TS_NetworkDDosUtils.class);
 
     public static void attackOnce(String urlString) {
         attackOnce(urlString, TGS_StringUtils.concat("p=", String.valueOf(TGS_RandomUtils.nextInt(0, Integer.MAX_VALUE))));
