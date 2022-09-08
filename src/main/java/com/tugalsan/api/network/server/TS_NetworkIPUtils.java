@@ -2,7 +2,7 @@ package com.tugalsan.api.network.server;
 
 import com.tugalsan.api.list.client.*;
 import com.tugalsan.api.log.server.*;
-import com.tugalsan.api.os.server.*;
+import com.tugalsan.api.os.server.TS_Process;
 import com.tugalsan.api.string.client.*;
 import com.tugalsan.api.unsafe.client.*;
 import java.net.*;
@@ -96,10 +96,10 @@ public class TS_NetworkIPUtils {
     public static String get_IP_CONFIG_ALL() {//cmd /c netstat
         var osName = System.getProperty("os.name").toLowerCase(Locale.ROOT);
         if (osName.startsWith("windows")) {
-            return TS_RuntimeUtils.runConsole_readResult("ipconfig /all");
+            return TS_Process.of("ipconfig /all").output;
         }
         if (osName.startsWith("linux")) {
-            return TS_RuntimeUtils.runConsole_readResult("ifconfig");
+            return TS_Process.of("ifconfig").output;
         }
         return TGS_UnSafe.catchMeIfUCanReturns(d.className, "get_IP_CONFIG_ALL", "UnknownOs: " + System.getProperty("os.name"));
     }
