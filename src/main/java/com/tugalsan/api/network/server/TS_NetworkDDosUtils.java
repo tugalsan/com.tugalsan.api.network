@@ -1,7 +1,7 @@
 package com.tugalsan.api.network.server;
 
 import com.tugalsan.api.log.server.*;
-import com.tugalsan.api.random.client.*;
+import com.tugalsan.api.random.server.TS_RandomUtils;
 import com.tugalsan.api.string.client.*;
 import com.tugalsan.api.unsafe.client.*;
 import java.net.*;
@@ -12,7 +12,7 @@ public class TS_NetworkDDosUtils {
     final private static TS_Log d = new TS_Log(TS_NetworkDDosUtils.class);
 
     public static void attackOnce(String urlString) {
-        attackOnce(urlString, TGS_StringUtils.concat("p=", String.valueOf(TGS_RandomUtils.nextInt(0, Integer.MAX_VALUE))));
+        attackOnce(urlString, TGS_StringUtils.concat("p=", String.valueOf(TS_RandomUtils.nextInt(0, Integer.MAX_VALUE))));
     }
 
     public static void attackOnce(String urlString, String paramPair) {
