@@ -1,5 +1,7 @@
 package com.tugalsan.api.network.server;
 
+import com.tugalsan.api.charset.client.TGS_CharSet;
+import com.tugalsan.api.charset.client.TGS_CharSetCast;
 import com.tugalsan.api.list.client.*;
 import com.tugalsan.api.log.server.*;
 import com.tugalsan.api.os.server.TS_Process;
@@ -94,7 +96,7 @@ public class TS_NetworkIPUtils {
     }
 
     public static String get_IP_CONFIG_ALL() {//cmd /c netstat
-        var osName = System.getProperty("os.name").toLowerCase(Locale.ROOT);
+        var osName = TGS_CharSetCast.toLocaleLowerCase(System.getProperty("os.name"));
         if (osName.startsWith("windows")) {
             return TS_Process.of("ipconfig /all").output;
         }
