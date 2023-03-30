@@ -4,7 +4,7 @@ import com.tugalsan.api.charset.client.TGS_CharSet;
 import com.tugalsan.api.charset.client.TGS_CharSetCast;
 import com.tugalsan.api.list.client.*;
 import com.tugalsan.api.log.server.*;
-import com.tugalsan.api.os.server.TS_Process;
+import com.tugalsan.api.os.server.TS_OsProcess;
 import com.tugalsan.api.string.client.*;
 import com.tugalsan.api.unsafe.client.*;
 import java.net.*;
@@ -98,10 +98,10 @@ public class TS_NetworkIPUtils {
     public static String get_IP_CONFIG_ALL() {//cmd /c netstat
         var osName = TGS_CharSetCast.toLocaleLowerCase(System.getProperty("os.name"));
         if (osName.startsWith("windows")) {
-            return TS_Process.of("ipconfig /all").output;
+            return TS_OsProcess.of("ipconfig /all").output;
         }
         if (osName.startsWith("linux")) {
-            return TS_Process.of("ifconfig").output;
+            return TS_OsProcess.of("ifconfig").output;
         }
         return TGS_UnSafe.catchMeIfUCanReturns(d.className, "get_IP_CONFIG_ALL", "UnknownOs: " + System.getProperty("os.name"));
     }
