@@ -34,7 +34,7 @@ public class TS_NetworkIPUtils {
     }
 
     public static void logIPServerAndIpRouter() {
-        TGS_UnSafe.execute(() -> {
+        TGS_UnSafe.run(() -> {
             d.cr("logIPServerAndIpRouter", "getIPServer()", TS_NetworkIPUtils.getIPServer());
             d.cr("logIPServerAndIpRouter", "getIPRouter()", TS_NetworkIPUtils.getIPRouter());
         }, e -> d.ce("logIPServerAndIpRouter", "ERROR: Possibly no internet connection!", e.getMessage()));
@@ -61,7 +61,7 @@ public class TS_NetworkIPUtils {
     }
 
     public static List<String> getReachables(CharSequence ipClassC) {
-        return TGS_UnSafe.compile(() -> {
+        return TGS_UnSafe.call(() -> {
             List<TaskIsReacable> taskList = TGS_ListUtils.of();
             IntStream.range(MIN_IP(), MAX_IP()).forEachOrdered(ipPartD -> {
                 var ipNext = TGS_StringUtils.concat(ipClassC, ".", String.valueOf(ipPartD));
@@ -72,7 +72,7 @@ public class TS_NetworkIPUtils {
             executor.shutdown();
             List<String> results = TGS_ListUtils.of();
             futures.stream().forEachOrdered(f -> {
-                TGS_UnSafe.execute(() -> {
+                TGS_UnSafe.run(() -> {
                     if (f.get() == null) {
                         return;
                     }
@@ -88,11 +88,11 @@ public class TS_NetworkIPUtils {
     }
 
     public static boolean isReacable(CharSequence ipAddress, int watchDogSeconds) {
-        return TGS_UnSafe.compile(() -> getByName(ipAddress).isReachable(watchDogSeconds * 1000));
+        return TGS_UnSafe.call(() -> getByName(ipAddress).isReachable(watchDogSeconds * 1000));
     }
 
     public static InetAddress getByName(CharSequence ipAddress) {
-        return TGS_UnSafe.compile(() -> InetAddress.getByName(ipAddress.toString()));
+        return TGS_UnSafe.call(() -> InetAddress.getByName(ipAddress.toString()));
     }
 
     public static String get_IP_CONFIG_ALL() {//cmd /c netstat
@@ -103,18 +103,18 @@ public class TS_NetworkIPUtils {
         if (osName.startsWith("linux")) {
             return TS_OsProcess.of("ifconfig").output;
         }
-        return TGS_UnSafe.catchMeIfUCanReturns(d.className, "get_IP_CONFIG_ALL", "UnknownOs: " + System.getProperty("os.name"));
+        return TGS_UnSafe.thrwReturns(d.className, "get_IP_CONFIG_ALL", "UnknownOs: " + System.getProperty("os.name"));
     }
 
     public static String getIPRouter() {
-        return TGS_UnSafe.compile(() -> {
+        return TGS_UnSafe.call(() -> {
             var ip = InetAddress.getLocalHost();
             return ip.getHostAddress();
         });
     }
 
     public static String getIPServer() {
-        return TGS_UnSafe.compile(() -> {
+        return TGS_UnSafe.call(() -> {
             try ( var socket = new Socket()) {
                 socket.connect(new InetSocketAddress("google.com", 80));
                 var ip = socket.getLocalAddress().toString();
@@ -127,7 +127,7 @@ public class TS_NetworkIPUtils {
     }
 
     public static String getIPClient(HttpServletRequest request) {
-        return TGS_UnSafe.compile(() -> {
+        return TGS_UnSafe.call(() -> {
             var r = request.getRemoteAddr();
             if (r != null && (r.equals("0:0:0:0:0:0:0:1") || r.equals("127.0.0.1") || r.equals("localhost"))) {
                 r = InetAddress.getLocalHost().getHostAddress();

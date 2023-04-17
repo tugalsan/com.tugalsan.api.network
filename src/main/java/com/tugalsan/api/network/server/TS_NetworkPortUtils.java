@@ -48,7 +48,7 @@ public class TS_NetworkPortUtils {
     }
 
     public static List<Integer> getReachables(CharSequence ip) {
-        return TGS_UnSafe.compile(() -> {
+        return TGS_UnSafe.call(() -> {
             List<TaskIsReacable> taskList = TGS_ListUtils.of();
             IntStream.range(MIN_PORT(), MAX_PORT()).forEachOrdered(port -> taskList.add(new TaskIsReacable(ip, port, MAX_TIMEOUT_SEC())));
             var executor = (ExecutorService) Executors.newFixedThreadPool(MAX_THREAD_COUNT());
@@ -56,7 +56,7 @@ public class TS_NetworkPortUtils {
             executor.shutdown();
             List<Integer> results = TGS_ListUtils.of();
             futures.stream().forEachOrdered(f -> {
-                TGS_UnSafe.execute(() -> {
+                TGS_UnSafe.run(() -> {
                     var port = f.get();
                     if (port != null) {
                         results.add(port);
@@ -68,7 +68,7 @@ public class TS_NetworkPortUtils {
     }
 
     public static boolean isReacable(CharSequence ip, int port, float watchDogSeconds) {
-        return TGS_UnSafe.compile(() -> {
+        return TGS_UnSafe.call(() -> {
             try ( var socket = new Socket();) {
                 socket.connect(new InetSocketAddress(ip.toString(), port), Math.round(watchDogSeconds * 1000));
                 return true;

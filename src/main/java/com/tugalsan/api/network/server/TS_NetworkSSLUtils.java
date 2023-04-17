@@ -10,7 +10,7 @@ public class TS_NetworkSSLUtils {
 
     //https://mkyong.com/java/java-https-client-httpsurlconnection-example/
     public static StringBuffer info(HttpsURLConnection con) {
-        return TGS_UnSafe.compile(() -> {
+        return TGS_UnSafe.call(() -> {
             var sb = new StringBuffer();
             sb.append("\nResponse Code : ").append(con.getResponseCode());
             sb.append("\nCipher Suite : ").append(con.getCipherSuite());
@@ -30,7 +30,7 @@ public class TS_NetworkSSLUtils {
     }
 
     public static void disableCertificateValidation() {
-        TGS_UnSafe.execute(() -> {
+        TGS_UnSafe.run(() -> {
             var sc = SSLContext.getInstance("SSL");
             sc.init(null, new TrustManager[]{
                 new X509TrustManager() {
@@ -50,6 +50,6 @@ public class TS_NetworkSSLUtils {
             }, new SecureRandom());
             HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
             HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
-        }, e -> TGS_UnSafe.doNothing());
+        }, e -> TGS_UnSafe.runNothing());
     }
 }

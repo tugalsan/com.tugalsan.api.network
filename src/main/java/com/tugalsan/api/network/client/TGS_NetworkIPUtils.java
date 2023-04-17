@@ -13,7 +13,7 @@ public class TGS_NetworkIPUtils {
         if (groups.length != 4) {
             return false;
         }
-        return TGS_UnSafe.compile(() -> Arrays.stream(groups)
+        return TGS_UnSafe.call(() -> Arrays.stream(groups)
                 .filter(s -> s.length() > 1 && s.startsWith("0"))
                 .map(Integer::parseInt)
                 .filter(i -> (i >= 0 && i <= 255))
