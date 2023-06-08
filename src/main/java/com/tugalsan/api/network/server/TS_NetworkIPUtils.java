@@ -1,6 +1,5 @@
 package com.tugalsan.api.network.server;
 
-import com.tugalsan.api.charset.client.TGS_CharSet;
 import com.tugalsan.api.charset.client.TGS_CharSetCast;
 import com.tugalsan.api.list.client.*;
 import com.tugalsan.api.log.server.*;
