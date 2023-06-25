@@ -112,17 +112,17 @@ public class TS_NetworkIPUtils {
         });
     }
 
-    public static String getIPServer() {
+    public static Optional<String> getIPServer() {
         return TGS_UnSafe.call(() -> {
-            try ( var socket = new Socket()) {
+            try (var socket = new Socket()) {
                 socket.connect(new InetSocketAddress("google.com", 80));
                 var ip = socket.getLocalAddress().toString();
                 if (ip != null && ip.startsWith("/")) {
                     ip = ip.substring(1);
                 }
-                return ip;
+                return Optional.of(ip);
             }
-        });
+        }, e -> Optional.empty());
     }
 
     public static String getIPClient(HttpServletRequest request) {
