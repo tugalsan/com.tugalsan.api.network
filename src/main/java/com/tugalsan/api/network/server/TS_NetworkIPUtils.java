@@ -34,7 +34,7 @@ public class TS_NetworkIPUtils {
 
     public static void logIPServerAndIpRouter() {
         TGS_UnSafe.run(() -> {
-            d.cr("logIPServerAndIpRouter", "getIPServer()", TS_NetworkIPUtils.getIPServer());
+            d.cr("logIPServerAndIpRouter", "getIPServer()", TS_NetworkIPUtils.getIPServer_ifConnectedToInternet());
             d.cr("logIPServerAndIpRouter", "getIPRouter()", TS_NetworkIPUtils.getIPRouter());
         }, e -> d.ce("logIPServerAndIpRouter", "ERROR: Possibly no internet connection!", e.getMessage()));
     }
@@ -112,7 +112,7 @@ public class TS_NetworkIPUtils {
         });
     }
 
-    public static Optional<String> getIPServer() {
+    public static Optional<String> getIPServer_ifConnectedToInternet() {
         return TGS_UnSafe.call(() -> {
             try (var socket = new Socket()) {
                 socket.connect(new InetSocketAddress("google.com", 80));
