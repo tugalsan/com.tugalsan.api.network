@@ -59,14 +59,16 @@ public class TS_NetworkIPUtils {
         }
     }
 
-    public static List<String> getReachables(CharSequence ipClassC) {
+    public static List<String> getReachables(CharSequence ipClassC, boolean useVirtualThread) {
         return TGS_UnSafe.call(() -> {
             List<TaskIsReacable> taskList = TGS_ListUtils.of();
             IntStream.range(MIN_IP(), MAX_IP()).forEachOrdered(ipPartD -> {
                 var ipNext = TGS_StringUtils.concat(ipClassC, ".", String.valueOf(ipPartD));
                 taskList.add(new TaskIsReacable(ipNext, MAX_TIMEOUT_SEC()));
             });
-            var executor = (ExecutorService) Executors.newFixedThreadPool(MAX_THREAD_COUNT());
+            var executor = useVirtualThread
+                    ? (ExecutorService) Executors.newVirtualThreadPerTaskExecutor()
+                    : (ExecutorService) Executors.newFixedThreadPool(MAX_THREAD_COUNT());
             var futures = executor.invokeAll(taskList);
             executor.shutdown();
             List<String> results = TGS_ListUtils.of();

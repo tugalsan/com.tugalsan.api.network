@@ -47,11 +47,13 @@ public class TS_NetworkPortUtils {
         }
     }
 
-    public static List<Integer> getReachables(CharSequence ip) {
+    public static List<Integer> getReachables(CharSequence ip, boolean useVirtualThread) {
         return TGS_UnSafe.call(() -> {
             List<TaskIsReacable> taskList = TGS_ListUtils.of();
             IntStream.range(MIN_PORT(), MAX_PORT()).forEachOrdered(port -> taskList.add(new TaskIsReacable(ip, port, MAX_TIMEOUT_SEC())));
-            var executor = (ExecutorService) Executors.newFixedThreadPool(MAX_THREAD_COUNT());
+            var executor = useVirtualThread
+                    ? (ExecutorService) Executors.newVirtualThreadPerTaskExecutor()
+                    : (ExecutorService) Executors.newFixedThreadPool(MAX_THREAD_COUNT());
             var futures = executor.invokeAll(taskList);
             executor.shutdown();
             List<Integer> results = TGS_ListUtils.of();
@@ -69,7 +71,7 @@ public class TS_NetworkPortUtils {
 
     public static boolean isReacable(CharSequence ip, int port, float watchDogSeconds) {
         return TGS_UnSafe.call(() -> {
-            try ( var socket = new Socket();) {
+            try (var socket = new Socket();) {
                 socket.connect(new InetSocketAddress(ip.toString(), port), Math.round(watchDogSeconds * 1000));
                 return true;
             }
