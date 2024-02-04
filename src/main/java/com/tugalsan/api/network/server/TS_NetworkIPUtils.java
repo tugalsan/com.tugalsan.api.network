@@ -3,6 +3,7 @@ package com.tugalsan.api.network.server;
 import com.tugalsan.api.charset.client.TGS_CharSetCast;
 import com.tugalsan.api.list.client.*;
 import com.tugalsan.api.log.server.*;
+import com.tugalsan.api.network.client.TGS_NetworkIPUtils;
 import com.tugalsan.api.os.server.TS_OsProcess;
 import com.tugalsan.api.string.client.*;
 import com.tugalsan.api.unsafe.client.*;
@@ -130,7 +131,7 @@ public class TS_NetworkIPUtils {
     public static String getIPClient(HttpServletRequest request) {
         return TGS_UnSafe.call(() -> {
             var r = request.getRemoteAddr();
-            if (r != null && (r.equals("0:0:0:0:0:0:0:1") || r.equals("127.0.0.1") || r.equals("localhost"))) {
+            if (TGS_NetworkIPUtils.isLocalHost(r)) {
                 r = InetAddress.getLocalHost().getHostAddress();
             }
             return r;
