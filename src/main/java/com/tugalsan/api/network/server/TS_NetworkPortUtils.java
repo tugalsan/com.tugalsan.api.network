@@ -52,8 +52,8 @@ public class TS_NetworkPortUtils {
             List<TaskIsReacable> taskList = TGS_ListUtils.of();
             IntStream.range(MIN_PORT(), MAX_PORT()).forEachOrdered(port -> taskList.add(new TaskIsReacable(ip, port, MAX_TIMEOUT_SEC())));
             var executor = useVirtualThread
-                    ? (ExecutorService) Executors.newVirtualThreadPerTaskExecutor()
-                    : (ExecutorService) Executors.newFixedThreadPool(MAX_THREAD_COUNT());
+                    ? Executors.newVirtualThreadPerTaskExecutor()
+                    : Executors.newFixedThreadPool(MAX_THREAD_COUNT());
             var futures = executor.invokeAll(taskList);
             executor.shutdown();
             List<Integer> results = TGS_ListUtils.of();

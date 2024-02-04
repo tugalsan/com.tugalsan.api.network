@@ -67,8 +67,8 @@ public class TS_NetworkIPUtils {
                 taskList.add(new TaskIsReacable(ipNext, MAX_TIMEOUT_SEC()));
             });
             var executor = useVirtualThread
-                    ? (ExecutorService) Executors.newVirtualThreadPerTaskExecutor()
-                    : (ExecutorService) Executors.newFixedThreadPool(MAX_THREAD_COUNT());
+                    ? Executors.newVirtualThreadPerTaskExecutor()
+                    : Executors.newFixedThreadPool(MAX_THREAD_COUNT());
             var futures = executor.invokeAll(taskList);
             executor.shutdown();
             List<String> results = TGS_ListUtils.of();
