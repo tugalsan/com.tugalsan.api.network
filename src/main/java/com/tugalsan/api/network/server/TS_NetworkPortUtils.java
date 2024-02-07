@@ -1,13 +1,20 @@
 package com.tugalsan.api.network.server;
 
-import com.tugalsan.api.list.client.*;
+import com.tugalsan.api.callable.client.TGS_CallableType1;
+import com.tugalsan.api.log.server.TS_Log;
+import com.tugalsan.api.stream.client.TGS_StreamUtils;
+import com.tugalsan.api.thread.server.async.TS_ThreadAsyncAwait;
+import com.tugalsan.api.thread.server.sync.TS_ThreadSyncTrigger;
 import com.tugalsan.api.unsafe.client.*;
 import java.net.*;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.*;
 
 public class TS_NetworkPortUtils {
+
+    final private static TS_Log d = TS_Log.of(true, TS_NetworkPortUtils.class);
 
     public static int MIN_PORT() {
         return 1;
@@ -25,7 +32,7 @@ public class TS_NetworkPortUtils {
         return 0.4f;
     }
 
-    private static class TaskIsReacable implements Callable<Integer> {
+    private static class TaskIsReacable implements TGS_CallableType1<Optional<Integer>, TS_ThreadSyncTrigger> {
 
         private final String ipAddress;
         private final int port;
@@ -38,37 +45,72 @@ public class TS_NetworkPortUtils {
         }
 
         @Override
-        public Integer call() {
-            var result = isReacable(ipAddress, port, watchDogSeconds) ? port : null;
+        public Optional<Integer> call(TS_ThreadSyncTrigger threadKiller) {
             if (port % 1000 == 0) {
-                System.out.println("end.ipAddress:" + ipAddress + ", port:" + port);
+                d.ci("end.ipAddress:" + ipAddress + ", port:" + port);
             }
-            return result;
+            return isReacable(ipAddress, port, watchDogSeconds) ? Optional.of(port) : Optional.empty();
         }
     }
 
-    public static List<Integer> getReachables(CharSequence ip, boolean useVirtualThread) {
+    public static List<Integer> getReachables(CharSequence ip, TS_ThreadSyncTrigger threadKiller, Semaphore threadLimitor, Duration threadUntil) {
         return TGS_UnSafe.call(() -> {
-            List<TaskIsReacable> taskList = TGS_ListUtils.of();
-            IntStream.range(MIN_PORT(), MAX_PORT()).forEachOrdered(port -> taskList.add(new TaskIsReacable(ip, port, MAX_TIMEOUT_SEC())));
-            var executor = useVirtualThread
-                    ? Executors.newVirtualThreadPerTaskExecutor()
-                    : Executors.newFixedThreadPool(MAX_THREAD_COUNT());
-            var futures = executor.invokeAll(taskList);
-            executor.shutdown();
-            List<Integer> results = TGS_ListUtils.of();
-            futures.stream().forEachOrdered(f -> {
-                TGS_UnSafe.run(() -> {
-                    var port = f.get();
-                    if (port != null) {
-                        results.add(port);
-                    }
-                });
-            });
-            return results;
+            List<TGS_CallableType1<Optional<Integer>, TS_ThreadSyncTrigger>> taskList = TGS_StreamUtils.toLst(
+                    IntStream.range(MIN_PORT(), MAX_PORT())
+                            .mapToObj(port -> new TaskIsReacable(ip, port, MAX_TIMEOUT_SEC()))
+            );
+            var await = TS_ThreadAsyncAwait.callParallel(threadKiller, threadLimitor, threadUntil, taskList);
+            return TGS_StreamUtils.toLst(
+                    await.resultsForSuccessfulOnes.stream()
+                            .filter(r -> !r.isEmpty())
+                            .map(r -> r.get())
+            );
         });
     }
 
+    //https://stackoverflow.com/questions/77937704/in-java-how-to-migrate-from-executors-newfixedthreadpoolmax-thread-count-to?noredirect=1#comment137420375_77937704
+//        private static class TaskIsReacable implements Callable<Integer> {
+//
+//            private final String ipAddress;
+//            private final int port;
+//            private final float watchDogSeconds;
+//
+//            public TaskIsReacable(CharSequence ipAddress, int port, float watchDogSeconds) {
+//                this.ipAddress = ipAddress.toString();
+//                this.port = port;
+//                this.watchDogSeconds = watchDogSeconds;
+//            }
+//
+//            @Override
+//            public Integer call() {
+//                var result = isReacable(ipAddress, port, watchDogSeconds) ? port : null;
+//                if (port % 1000 == 0) {
+//                    System.out.println("end.ipAddress:" + ipAddress + ", port:" + port);
+//                }
+//                return result;
+//            }
+//        }
+//    public static List<Integer> getReachables(CharSequence ip, boolean useVirtualThread) {
+//        return TGS_UnSafe.call(() -> {
+//            List<TaskIsReacable> taskList = TGS_ListUtils.of();
+//            IntStream.range(MIN_PORT(), MAX_PORT()).forEachOrdered(port -> taskList.add(new TaskIsReacable(ip, port, MAX_TIMEOUT_SEC())));
+//            var executor = useVirtualThread
+//                    ? Executors.newVirtualThreadPerTaskExecutor()
+//                    : Executors.newFixedThreadPool(MAX_THREAD_COUNT());
+//            var futures = executor.invokeAll(taskList);
+//            executor.shutdown();
+//            List<Integer> results = TGS_ListUtils.of();
+//            futures.stream().forEachOrdered(f -> {
+//                TGS_UnSafe.run(() -> {
+//                    var port = f.get();
+//                    if (port != null) {
+//                        results.add(port);
+//                    }
+//                });
+//            });
+//            return results;
+//        });
+//    }
     public static boolean isReacable(CharSequence ip, int port, float watchDogSeconds) {
         return TGS_UnSafe.call(() -> {
             try (var socket = new Socket();) {

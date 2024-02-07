@@ -1,13 +1,17 @@
 package com.tugalsan.api.network.server;
 
+import com.tugalsan.api.callable.client.TGS_CallableType1;
 import com.tugalsan.api.charset.client.TGS_CharSetCast;
-import com.tugalsan.api.list.client.*;
 import com.tugalsan.api.log.server.*;
 import com.tugalsan.api.network.client.TGS_NetworkIPUtils;
 import com.tugalsan.api.os.server.TS_OsProcess;
+import com.tugalsan.api.stream.client.TGS_StreamUtils;
 import com.tugalsan.api.string.client.*;
+import com.tugalsan.api.thread.server.async.TS_ThreadAsyncAwait;
+import com.tugalsan.api.thread.server.sync.TS_ThreadSyncTrigger;
 import com.tugalsan.api.unsafe.client.*;
 import java.net.*;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.*;
@@ -15,7 +19,7 @@ import javax.servlet.http.*;
 
 public class TS_NetworkIPUtils {
 
-    final private static TS_Log d = TS_Log.of(TS_NetworkIPUtils.class);
+    final private static TS_Log d = TS_Log.of(true, TS_NetworkIPUtils.class);
 
     public static int MIN_IP() {
         return 0;
@@ -40,7 +44,7 @@ public class TS_NetworkIPUtils {
         }, e -> d.ce("logIPServerAndIpRouter", "ERROR: Possibly no internet connection!", e.getMessage()));
     }
 
-    private static class TaskIsReacable implements Callable<String> {
+    private static class TaskIsReacable implements TGS_CallableType1<Optional<String>, TS_ThreadSyncTrigger> {
 
         private final String ipAddress;
         private final int watchDogSeconds;
@@ -51,40 +55,74 @@ public class TS_NetworkIPUtils {
         }
 
         @Override
-        public String call() {
-            var result = isReacable(ipAddress, watchDogSeconds) ? ipAddress : null;
+        public Optional<String> call(TS_ThreadSyncTrigger threadKiller) {
             if (ipAddress.endsWith("5")) {
-                System.out.println("end.ipAddress:" + ipAddress);
+                d.ci("end.ipAddress:" + ipAddress);
             }
-            return result;
+            return isReacable(ipAddress, watchDogSeconds) ? Optional.of(ipAddress) : Optional.empty();
         }
     }
 
-    public static List<String> getReachables(CharSequence ipClassC, boolean useVirtualThread) {
+    public static List<String> getReachables(CharSequence ipClassC, TS_ThreadSyncTrigger threadKiller, Semaphore threadLimitor, Duration threadUntil) {
         return TGS_UnSafe.call(() -> {
-            List<TaskIsReacable> taskList = TGS_ListUtils.of();
-            IntStream.range(MIN_IP(), MAX_IP()).forEachOrdered(ipPartD -> {
-                var ipNext = TGS_StringUtils.concat(ipClassC, ".", String.valueOf(ipPartD));
-                taskList.add(new TaskIsReacable(ipNext, MAX_TIMEOUT_SEC()));
-            });
-            var executor = useVirtualThread
-                    ? Executors.newVirtualThreadPerTaskExecutor()
-                    : Executors.newFixedThreadPool(MAX_THREAD_COUNT());
-            var futures = executor.invokeAll(taskList);
-            executor.shutdown();
-            List<String> results = TGS_ListUtils.of();
-            futures.stream().forEachOrdered(f -> {
-                TGS_UnSafe.run(() -> {
-                    if (f.get() == null) {
-                        return;
-                    }
-                    results.add(f.get());
-                });
-            });
-            return results;
+            List<TGS_CallableType1<Optional<String>, TS_ThreadSyncTrigger>> taskList = TGS_StreamUtils.toLst(
+                    IntStream.range(MIN_IP(), MAX_IP())
+                            .mapToObj(ipPartD -> TGS_StringUtils.concat(ipClassC, ".", String.valueOf(ipPartD)))
+                            .map(ipNext -> new TaskIsReacable(ipNext, MAX_TIMEOUT_SEC()))
+            );
+            var await = TS_ThreadAsyncAwait.callParallel(threadKiller, threadLimitor, threadUntil, taskList);
+            return TGS_StreamUtils.toLst(
+                    await.resultsForSuccessfulOnes.stream()
+                            .filter(r -> !r.isEmpty())
+                            .map(r -> r.get())
+            );
         });
     }
 
+    //https://stackoverflow.com/questions/77937704/in-java-how-to-migrate-from-executors-newfixedthreadpoolmax-thread-count-to?noredirect=1#comment137420375_77937704
+//        private static class TaskIsReacable implements Callable<String> {
+//
+//            private final String ipAddress;
+//            private final int watchDogSeconds;
+//
+//            public TaskIsReacable(String ipAddress, int watchDogSeconds) {
+//                this.ipAddress = ipAddress;
+//                this.watchDogSeconds = watchDogSeconds;
+//            }
+//
+//            @Override
+//            public String call() {
+//                var result = isReacable(ipAddress, watchDogSeconds) ? ipAddress : null;
+//                if (ipAddress.endsWith("5")) {
+//                    System.out.println("end.ipAddress:" + ipAddress);
+//                }
+//                return result;
+//            }
+//        }
+//    public static List<String> getReachables(CharSequence ipClassC, boolean useVirtualThread) {
+//        return TGS_UnSafe.call(() -> {
+//            List<TaskIsReacable> taskList = TGS_ListUtils.of();
+//            IntStream.range(MIN_IP(), MAX_IP()).forEachOrdered(ipPartD -> {
+//                var ipNext = TGS_StringUtils.concat(ipClassC, ".", String.valueOf(ipPartD));
+//                taskList.add(new TaskIsReacable(ipNext, MAX_TIMEOUT_SEC()));
+//            });
+//            var executor = useVirtualThread
+//                    ? Executors.newVirtualThreadPerTaskExecutor()
+//                    : Executors.newFixedThreadPool(MAX_THREAD_COUNT());
+//            var futures = executor.invokeAll(taskList);
+//            executor.shutdown();
+//            List<String> results = TGS_ListUtils.of();
+//            futures.stream().forEachOrdered(f -> {
+//                TGS_UnSafe.run(() -> {
+//                    if (f.get() == null) {
+//                        return;
+//                    }
+//                    results.add(f.get());
+//                });
+//            });
+//            return results;
+//        });
+//    }
     public static boolean isReacable(CharSequence ipAddress) {
         return isReacable(ipAddress, 5);
     }

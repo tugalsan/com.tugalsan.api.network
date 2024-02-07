@@ -37,6 +37,11 @@
             <artifactId>com.tugalsan.api.charset</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>com.tugalsan.api.thread</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
     
     <build>
@@ -81,8 +86,8 @@
                 <version>3.11.0</version>
                 <configuration>
                     <release>21</release>
-                     <!--  <enablePreview>true</enablePreview>
-                    <compilerArgs>
+                     <enablePreview>true</enablePreview>
+                    <!--<compilerArgs>
                        <arg>- -add-modules</arg>
                         <arg>jdk.incubator.vector</arg>
                         <arg>-XX:+EnableDynamicAgentLoading 
