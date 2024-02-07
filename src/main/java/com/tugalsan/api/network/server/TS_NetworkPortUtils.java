@@ -53,8 +53,10 @@ public class TS_NetworkPortUtils {
         }
     }
 
-    public static List<Integer> getReachables(CharSequence ip, TS_ThreadSyncTrigger threadKiller, Semaphore threadLimitor, Duration threadUntil) {
+    public static List<Integer> getReachables(CharSequence ip, TS_ThreadSyncTrigger threadKiller) {
         return TGS_UnSafe.call(() -> {
+            var threadLimitor = new Semaphore(MAX_THREAD_COUNT());
+            var threadUntil = Duration.ofSeconds(2 * (long) MAX_TIMEOUT_SEC() * (MAX_PORT() - MIN_PORT()));
             List<TGS_CallableType1<Optional<Integer>, TS_ThreadSyncTrigger>> taskList = TGS_StreamUtils.toLst(
                     IntStream.range(MIN_PORT(), MAX_PORT())
                             .mapToObj(port -> new TaskIsReacable(ip, port, MAX_TIMEOUT_SEC()))

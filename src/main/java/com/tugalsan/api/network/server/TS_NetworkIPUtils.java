@@ -63,8 +63,10 @@ public class TS_NetworkIPUtils {
         }
     }
 
-    public static List<String> getReachables(CharSequence ipClassC, TS_ThreadSyncTrigger threadKiller, Semaphore threadLimitor, Duration threadUntil) {
+    public static List<String> getReachables(CharSequence ipClassC, TS_ThreadSyncTrigger threadKiller) {
         return TGS_UnSafe.call(() -> {
+            var threadLimitor = new Semaphore(MAX_THREAD_COUNT());
+            var threadUntil = Duration.ofSeconds(2 * (long) MAX_TIMEOUT_SEC() * (MAX_IP() - MIN_IP()));
             List<TGS_CallableType1<Optional<String>, TS_ThreadSyncTrigger>> taskList = TGS_StreamUtils.toLst(
                     IntStream.range(MIN_IP(), MAX_IP())
                             .mapToObj(ipPartD -> TGS_StringUtils.concat(ipClassC, ".", String.valueOf(ipPartD)))
