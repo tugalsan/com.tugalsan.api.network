@@ -63,20 +63,18 @@ public class TS_NetworkIPUtils {
     }
 
     public static List<String> getReachables(CharSequence ipClassC, TS_ThreadSyncTrigger threadKiller) {
-        return TGS_UnSafe.call(() -> {
-            var threadUntil = Duration.ofSeconds(2 * (long) MAX_TIMEOUT_SEC() * (MAX_IP() - MIN_IP()));
-            List<TGS_CallableType1<Optional<String>, TS_ThreadSyncTrigger>> taskList = TGS_StreamUtils.toLst(
-                    IntStream.range(MIN_IP(), MAX_IP())
-                            .mapToObj(ipPartD -> TGS_StringUtils.concat(ipClassC, ".", String.valueOf(ipPartD)))
-                            .map(ipNext -> new TaskIsReacable(ipNext, MAX_TIMEOUT_SEC()))
-            );
-            var await = TS_ThreadAsyncAwait.callParallelRateLimited(threadKiller, MAX_THREAD_COUNT(), threadUntil, taskList);
-            return TGS_StreamUtils.toLst(
-                    await.resultsForSuccessfulOnes.stream()
-                            .filter(r -> !r.isEmpty())
-                            .map(r -> r.get())
-            );
-        });
+        var threadUntil = Duration.ofSeconds(2 * (long) MAX_TIMEOUT_SEC() * (MAX_IP() - MIN_IP()));
+        List<TGS_CallableType1<Optional<String>, TS_ThreadSyncTrigger>> taskList = TGS_StreamUtils.toLst(
+                IntStream.range(MIN_IP(), MAX_IP())
+                        .mapToObj(ipPartD -> TGS_StringUtils.concat(ipClassC, ".", String.valueOf(ipPartD)))
+                        .map(ipNext -> new TaskIsReacable(ipNext, MAX_TIMEOUT_SEC()))
+        );
+        var await = TS_ThreadAsyncAwait.callParallelRateLimited(threadKiller, MAX_THREAD_COUNT(), threadUntil, taskList);
+        return TGS_StreamUtils.toLst(
+                await.resultsForSuccessfulOnes.stream()
+                        .filter(r -> !r.isEmpty())
+                        .map(r -> r.get())
+        );
     }
 
     //https://stackoverflow.com/questions/77937704/in-java-how-to-migrate-from-executors-newfixedthreadpoolmax-thread-count-to?noredirect=1#comment137420375_77937704
