@@ -18,7 +18,7 @@ import javax.servlet.http.*;
 
 public class TS_NetworkIPUtils {
 
-    final private static TS_Log d = TS_Log.of(true, TS_NetworkIPUtils.class);
+    final private static TS_Log d = TS_Log.of( TS_NetworkIPUtils.class);
 
     public static int MIN_IP() {
         return 0;

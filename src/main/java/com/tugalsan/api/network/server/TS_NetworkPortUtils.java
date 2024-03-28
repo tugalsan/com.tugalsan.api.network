@@ -13,7 +13,7 @@ import java.util.stream.*;
 
 public class TS_NetworkPortUtils {
 
-    final private static TS_Log d = TS_Log.of(true, TS_NetworkPortUtils.class);
+    final private static TS_Log d = TS_Log.of( TS_NetworkPortUtils.class);
 
     public static int MIN_PORT() {
         return 1;
