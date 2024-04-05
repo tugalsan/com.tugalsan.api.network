@@ -9,7 +9,8 @@ import com.tugalsan.api.stream.client.TGS_StreamUtils;
 import com.tugalsan.api.string.client.*;
 import com.tugalsan.api.thread.server.async.TS_ThreadAsyncAwait;
 import com.tugalsan.api.thread.server.sync.TS_ThreadSyncTrigger;
-import com.tugalsan.api.unsafe.client.*;
+import com.tugalsan.api.union.client.TGS_Union;
+import java.io.IOException;
 import java.net.*;
 import java.time.Duration;
 import java.util.*;
@@ -18,7 +19,7 @@ import javax.servlet.http.*;
 
 public class TS_NetworkIPUtils {
 
-    final private static TS_Log d = TS_Log.of( TS_NetworkIPUtils.class);
+    final private static TS_Log d = TS_Log.of(TS_NetworkIPUtils.class);
 
     public static int MIN_IP() {
         return 0;
@@ -37,10 +38,8 @@ public class TS_NetworkIPUtils {
     }
 
     public static void logIPServerAndIpRouter() {
-        TGS_UnSafe.run(() -> {
-            d.cr("logIPServerAndIpRouter", "getIPServer()", TS_NetworkIPUtils.getIPServer_ifConnectedToInternet());
-            d.cr("logIPServerAndIpRouter", "getIPRouter()", TS_NetworkIPUtils.getIPRouter());
-        }, e -> d.ce("logIPServerAndIpRouter", "ERROR: Possibly no internet connection!", e.getMessage()));
+        d.cr("logIPServerAndIpRouter", "getIPServer()", TS_NetworkIPUtils.getIPServer_ifConnectedToInternet());
+        d.cr("logIPServerAndIpRouter", "getIPRouter()", TS_NetworkIPUtils.getIPRouter());
     }
 
     private static class TaskIsReacable implements TGS_CallableType1<Optional<String>, TS_ThreadSyncTrigger> {
@@ -126,51 +125,75 @@ public class TS_NetworkIPUtils {
     }
 
     public static boolean isReacable(CharSequence ipAddress, int watchDogSeconds) {
-        return TGS_UnSafe.call(() -> getByName(ipAddress).isReachable(watchDogSeconds * 1000));
+        try {
+            var u = getByName(ipAddress);
+            if (u.isEmpty()) {
+                return false;
+            }
+            return u.value.isReachable(watchDogSeconds * 1000);
+        } catch (IOException ex) {
+            return false;
+        }
     }
 
-    public static InetAddress getByName(CharSequence ipAddress) {
-        return TGS_UnSafe.call(() -> InetAddress.getByName(ipAddress.toString()));
+    public static TGS_Union<InetAddress> getByName(CharSequence ipAddress) {
+        try {
+            return TGS_Union.of(InetAddress.getByName(ipAddress.toString()));
+        } catch (UnknownHostException ex) {
+            return TGS_Union.ofThrowable(ex);
+        }
     }
 
-    public static String get_IP_CONFIG_ALL() {//cmd /c netstat
+    public static TGS_Union<String> get_IP_CONFIG_ALL() {//cmd /c netstat
         var osName = TGS_CharSetCast.toLocaleLowerCase(System.getProperty("os.name"));
         if (osName.startsWith("windows")) {
-            return TS_OsProcess.of("ipconfig /all").output;
+            return TGS_Union.of(TS_OsProcess.of("ipconfig /all").output);
         }
         if (osName.startsWith("linux")) {
-            return TS_OsProcess.of("ifconfig").output;
+            return TGS_Union.of(TS_OsProcess.of("ifconfig").output);
         }
-        return TGS_UnSafe.thrwReturns(d.className, "get_IP_CONFIG_ALL", "UnknownOs: " + System.getProperty("os.name"));
+        return TGS_Union.ofThrowable(
+                d.className,
+                "get_IP_CONFIG_ALL",
+                "UnknownOs: " + System.getProperty("os.name")
+        );
     }
 
-    public static String getIPRouter() {
-        return TGS_UnSafe.call(() -> {
+    public static TGS_Union<String> getIPRouter() {
+        try {
             var ip = InetAddress.getLocalHost();
-            return ip.getHostAddress();
-        });
+            return TGS_Union.of(ip.getHostAddress());
+        } catch (UnknownHostException ex) {
+            return TGS_Union.ofThrowable(ex);
+        }
     }
 
-    public static Optional<String> getIPServer_ifConnectedToInternet() {
-        return TGS_UnSafe.call(() -> {
-            try (var socket = new Socket()) {
-                socket.connect(new InetSocketAddress("google.com", 80));
-                var ip = socket.getLocalAddress().toString();
-                if (ip != null && ip.startsWith("/")) {
-                    ip = ip.substring(1);
-                }
-                return Optional.of(ip);
+    public static TGS_Union<String> getIPServer_ifConnectedToInternet() {
+        try (var socket = new Socket()) {
+            socket.connect(new InetSocketAddress("google.com", 80));
+            var ip = socket.getLocalAddress().toString();
+            if (ip != null && ip.startsWith("/")) {
+                ip = ip.substring(1);
             }
-        }, e -> Optional.empty());
+            return TGS_Union.of(ip);
+        } catch (IOException ex) {
+            return TGS_Union.ofThrowable(
+                    d.className,
+                    "getIPServer_ifConnectedToInternet",
+                    "ERROR: Possibly no internet connection! " + ex.getMessage()
+            );
+        }
     }
 
-    public static String getIPClient(HttpServletRequest request) {
-        return TGS_UnSafe.call(() -> {
+    public static TGS_Union<String> getIPClient(HttpServletRequest request) {
+        try {
             var r = request.getRemoteAddr();
             if (TGS_NetworkIPUtils.isLocalHost(r)) {
                 r = InetAddress.getLocalHost().getHostAddress();
             }
-            return r;
-        });
+            return TGS_Union.of(r);
+        } catch (UnknownHostException ex) {
+            return TGS_Union.ofThrowable(ex);
+        }
     }
 }

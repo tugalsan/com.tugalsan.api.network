@@ -1,6 +1,6 @@
 package com.tugalsan.api.network.client;
 
-import com.tugalsan.api.unsafe.client.*;
+import com.tugalsan.api.cast.client.TGS_CastUtils;
 import java.util.*;
 
 public class TGS_NetworkIPUtils {
@@ -13,11 +13,12 @@ public class TGS_NetworkIPUtils {
         if (groups.length != 4) {
             return false;
         }
-        return TGS_UnSafe.call(() -> Arrays.stream(groups)
+        return Arrays.stream(groups)
                 .filter(s -> s.length() > 1 && s.startsWith("0"))
-                .map(Integer::parseInt)
+                .map(s -> TGS_CastUtils.toInteger(ip))
+                .filter(s -> s != null)
                 .filter(i -> (i >= 0 && i <= 255))
-                .count() == 4, e -> false);
+                .count() == 4;
     }
 
     public static boolean isLocalHost(CharSequence domainOrIp) {

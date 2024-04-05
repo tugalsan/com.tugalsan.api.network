@@ -1,6 +1,8 @@
 package com.tugalsan.api.network.server;
 
-import com.tugalsan.api.unsafe.client.*;
+import com.tugalsan.api.log.server.TS_Log;
+import com.tugalsan.api.union.client.TGS_Union;
+import java.io.IOException;
 import javax.net.ssl.*;
 import java.security.*;
 import java.security.cert.*;
@@ -8,9 +10,11 @@ import java.util.*;
 
 public class TS_NetworkSSLUtils {
 
+    final private static TS_Log d = TS_Log.of(TS_NetworkSSLUtils.class);
+
     //https://mkyong.com/java/java-https-client-httpsurlconnection-example/
-    public static StringBuffer info(HttpsURLConnection con) {
-        return TGS_UnSafe.call(() -> {
+    public static TGS_Union<StringBuffer> info(HttpsURLConnection con) {
+        try {
             var sb = new StringBuffer();
             sb.append("\nResponse Code : ").append(con.getResponseCode());
             sb.append("\nCipher Suite : ").append(con.getCipherSuite());
@@ -22,15 +26,14 @@ public class TS_NetworkSSLUtils {
                 sb.append("\nCert Public Key Format : ").append(cert.getPublicKey().getFormat());
                 sb.append("\n\n");
             });
-            return sb;
-        }, e -> {
-            e.printStackTrace();
-            return null;
-        });
+            return TGS_Union.of(sb);
+        } catch (IOException ex) {
+            return TGS_Union.ofThrowable(ex);
+        }
     }
 
     public static void disableCertificateValidation() {
-        TGS_UnSafe.run(() -> {
+        try {
             var sc = SSLContext.getInstance("SSL");
             sc.init(null, new TrustManager[]{
                 new X509TrustManager() {
@@ -50,6 +53,8 @@ public class TS_NetworkSSLUtils {
             }, new SecureRandom());
             HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
             HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
-        }, e -> TGS_UnSafe.runNothing());
+        } catch (NoSuchAlgorithmException | KeyManagementException ex) {
+            d.ce("disableCertificateValidation", "Unsuccessful", ex.getMessage());
+        }
     }
 }

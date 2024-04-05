@@ -5,7 +5,7 @@ import com.tugalsan.api.log.server.TS_Log;
 import com.tugalsan.api.stream.client.TGS_StreamUtils;
 import com.tugalsan.api.thread.server.async.TS_ThreadAsyncAwait;
 import com.tugalsan.api.thread.server.sync.TS_ThreadSyncTrigger;
-import com.tugalsan.api.unsafe.client.*;
+import java.io.IOException;
 import java.net.*;
 import java.time.Duration;
 import java.util.*;
@@ -13,7 +13,7 @@ import java.util.stream.*;
 
 public class TS_NetworkPortUtils {
 
-    final private static TS_Log d = TS_Log.of( TS_NetworkPortUtils.class);
+    final private static TS_Log d = TS_Log.of(TS_NetworkPortUtils.class);
 
     public static int MIN_PORT() {
         return 1;
@@ -110,14 +110,12 @@ public class TS_NetworkPortUtils {
 //        });
 //    }
     public static boolean isReacable(CharSequence ip, int port, float watchDogSeconds) {
-        return TGS_UnSafe.call(() -> {
-            try (var socket = new Socket();) {
-                socket.connect(new InetSocketAddress(ip.toString(), port), Math.round(watchDogSeconds * 1000));
-                return true;
-            }
-        }, e -> {
+        try (var socket = new Socket();) {
+            socket.connect(new InetSocketAddress(ip.toString(), port), Math.round(watchDogSeconds * 1000));
+            return true;
+        } catch (IOException ex) {
             return false;
-        });
+        }
     }
 
 }

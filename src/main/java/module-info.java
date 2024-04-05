@@ -1,7 +1,8 @@
 module com.tugalsan.api.network {
     requires javax.servlet.api;
     requires com.tugalsan.api.os;
-    requires com.tugalsan.api.unsafe;
+    requires com.tugalsan.api.union;
+    requires com.tugalsan.api.cast;
     requires com.tugalsan.api.string;
     requires com.tugalsan.api.log;
     requires com.tugalsan.api.random;

@@ -1,14 +1,14 @@
 package com.tugalsan.api.network.server;
 
 import com.tugalsan.api.list.client.*;
-import com.tugalsan.api.unsafe.client.*;
+import com.tugalsan.api.union.client.TGS_Union;
 import java.net.*;
 import java.util.*;
 
 public class TS_NetworkMACUtils {
 
-    public static List<String> getMAC_FromNetworkInterface() {
-        return TGS_UnSafe.call(() -> {
+    public static TGS_Union<List<String>> getMAC_FromNetworkInterface() {
+        try {
             List<String> macs = TGS_ListUtils.of();
             var networks = NetworkInterface.getNetworkInterfaces();
             while (networks.hasMoreElements()) {
@@ -22,8 +22,10 @@ public class TS_NetworkMACUtils {
                     macs.add(sb.toString());
                 }
             }
-            return macs;
-        });
+            return TGS_Union.of(macs);
+        } catch (SocketException ex) {
+            return TGS_Union.ofThrowable(ex);
+        }
     }
 
     public static List<String> getMAC_from_IP_CONFIG_ALL(CharSequence fullInfo) {
