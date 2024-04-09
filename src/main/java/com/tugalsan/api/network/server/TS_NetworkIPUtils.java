@@ -130,7 +130,7 @@ public class TS_NetworkIPUtils {
             if (u.isEmpty()) {
                 return false;
             }
-            return u.value.isReachable(watchDogSeconds * 1000);
+            return u.value().isReachable(watchDogSeconds * 1000);
         } catch (IOException ex) {
             return false;
         }
@@ -140,7 +140,7 @@ public class TS_NetworkIPUtils {
         try {
             return TGS_Union.of(InetAddress.getByName(ipAddress.toString()));
         } catch (UnknownHostException ex) {
-            return TGS_Union.ofThrowable(ex);
+            return TGS_Union.ofExcuse(ex);
         }
     }
 
@@ -152,7 +152,7 @@ public class TS_NetworkIPUtils {
         if (osName.startsWith("linux")) {
             return TGS_Union.of(TS_OsProcess.of("ifconfig").output);
         }
-        return TGS_Union.ofThrowable(
+        return TGS_Union.ofExcuse(
                 d.className,
                 "get_IP_CONFIG_ALL",
                 "UnknownOs: " + System.getProperty("os.name")
@@ -164,7 +164,7 @@ public class TS_NetworkIPUtils {
             var ip = InetAddress.getLocalHost();
             return TGS_Union.of(ip.getHostAddress());
         } catch (UnknownHostException ex) {
-            return TGS_Union.ofThrowable(ex);
+            return TGS_Union.ofExcuse(ex);
         }
     }
 
@@ -177,7 +177,7 @@ public class TS_NetworkIPUtils {
             }
             return TGS_Union.of(ip);
         } catch (IOException ex) {
-            return TGS_Union.ofThrowable(
+            return TGS_Union.ofExcuse(
                     d.className,
                     "getIPServer_ifConnectedToInternet",
                     "ERROR: Possibly no internet connection! " + ex.getMessage()
@@ -193,7 +193,7 @@ public class TS_NetworkIPUtils {
             }
             return TGS_Union.of(r);
         } catch (UnknownHostException ex) {
-            return TGS_Union.ofThrowable(ex);
+            return TGS_Union.ofExcuse(ex);
         }
     }
 }

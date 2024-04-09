@@ -24,7 +24,7 @@ public class TS_NetworkMACUtils {
             }
             return TGS_Union.of(macs);
         } catch (SocketException ex) {
-            return TGS_Union.ofThrowable(ex);
+            return TGS_Union.ofExcuse(ex);
         }
     }
 

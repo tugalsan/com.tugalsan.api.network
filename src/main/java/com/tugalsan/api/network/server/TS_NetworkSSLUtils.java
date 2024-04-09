@@ -28,7 +28,7 @@ public class TS_NetworkSSLUtils {
             });
             return TGS_Union.of(sb);
         } catch (IOException ex) {
-            return TGS_Union.ofThrowable(ex);
+            return TGS_Union.ofExcuse(ex);
         }
     }
 
