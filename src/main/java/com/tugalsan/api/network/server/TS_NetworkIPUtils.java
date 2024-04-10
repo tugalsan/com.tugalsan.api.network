@@ -127,7 +127,7 @@ public class TS_NetworkIPUtils {
     public static boolean isReacable(CharSequence ipAddress, int watchDogSeconds) {
         try {
             var u = getByName(ipAddress);
-            if (u.isEmpty()) {
+            if (u.isExcuse()) {
                 return false;
             }
             return u.value().isReachable(watchDogSeconds * 1000);
