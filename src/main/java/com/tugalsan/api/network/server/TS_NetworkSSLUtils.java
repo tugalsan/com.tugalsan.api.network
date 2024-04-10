@@ -1,7 +1,7 @@
 package com.tugalsan.api.network.server;
 
 import com.tugalsan.api.log.server.TS_Log;
-import com.tugalsan.api.union.client.TGS_Union;
+import com.tugalsan.api.union.client.TGS_UnionExcuse;
 import java.io.IOException;
 import javax.net.ssl.*;
 import java.security.*;
@@ -13,7 +13,7 @@ public class TS_NetworkSSLUtils {
     final private static TS_Log d = TS_Log.of(TS_NetworkSSLUtils.class);
 
     //https://mkyong.com/java/java-https-client-httpsurlconnection-example/
-    public static TGS_Union<StringBuffer> info(HttpsURLConnection con) {
+    public static TGS_UnionExcuse<StringBuffer> info(HttpsURLConnection con) {
         try {
             var sb = new StringBuffer();
             sb.append("\nResponse Code : ").append(con.getResponseCode());
@@ -26,9 +26,9 @@ public class TS_NetworkSSLUtils {
                 sb.append("\nCert Public Key Format : ").append(cert.getPublicKey().getFormat());
                 sb.append("\n\n");
             });
-            return TGS_Union.of(sb);
+            return TGS_UnionExcuse.of(sb);
         } catch (IOException ex) {
-            return TGS_Union.ofExcuse(ex);
+            return TGS_UnionExcuse.ofExcuse(ex);
         }
     }
 

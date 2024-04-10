@@ -1,13 +1,13 @@
 package com.tugalsan.api.network.server;
 
 import com.tugalsan.api.list.client.*;
-import com.tugalsan.api.union.client.TGS_Union;
+import com.tugalsan.api.union.client.TGS_UnionExcuse;
 import java.net.*;
 import java.util.*;
 
 public class TS_NetworkMACUtils {
 
-    public static TGS_Union<List<String>> getMAC_FromNetworkInterface() {
+    public static TGS_UnionExcuse<List<String>> getMAC_FromNetworkInterface() {
         try {
             List<String> macs = TGS_ListUtils.of();
             var networks = NetworkInterface.getNetworkInterfaces();
@@ -22,9 +22,9 @@ public class TS_NetworkMACUtils {
                     macs.add(sb.toString());
                 }
             }
-            return TGS_Union.of(macs);
+            return TGS_UnionExcuse.of(macs);
         } catch (SocketException ex) {
-            return TGS_Union.ofExcuse(ex);
+            return TGS_UnionExcuse.ofExcuse(ex);
         }
     }
 
