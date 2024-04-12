@@ -16,7 +16,8 @@ public class TGS_NetworkIPUtils {
         return Arrays.stream(groups)
                 .filter(s -> s.length() > 1 && s.startsWith("0"))
                 .map(s -> TGS_CastUtils.toInteger(ip))
-                .filter(s -> s != null)
+                .filter(s -> s.isPresent())
+                .map(u -> u.value())
                 .filter(i -> (i >= 0 && i <= 255))
                 .count() == 4;
     }
