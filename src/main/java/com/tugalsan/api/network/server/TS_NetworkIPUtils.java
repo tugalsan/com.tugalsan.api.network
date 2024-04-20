@@ -141,7 +141,7 @@ public class TS_NetworkIPUtils {
         if (osName.startsWith("linux")) {
             return TS_OsProcess.of("ifconfig").output;
         }
-        return TGS_UnSafe.thrwReturns(d.className, "get_IP_CONFIG_ALL", "UnknownOs: " + System.getProperty("os.name"));
+        return TGS_UnSafe.thrw(d.className, "get_IP_CONFIG_ALL", "UnknownOs: " + System.getProperty("os.name"));
     }
 
     public static String getIPRouter() {
