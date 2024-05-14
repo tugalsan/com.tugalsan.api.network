@@ -5,6 +5,8 @@ import com.tugalsan.api.log.server.TS_Log;
 import com.tugalsan.api.stream.client.TGS_StreamUtils;
 import com.tugalsan.api.thread.server.async.TS_ThreadAsyncAwait;
 import com.tugalsan.api.thread.server.sync.TS_ThreadSyncTrigger;
+import com.tugalsan.api.union.client.TGS_UnionExcuse;
+import com.tugalsan.api.union.client.TGS_UnionExcuseVoid;
 import com.tugalsan.api.unsafe.client.*;
 import java.net.*;
 import java.time.Duration;
@@ -13,7 +15,7 @@ import java.util.stream.*;
 
 public class TS_NetworkPortUtils {
 
-    final private static TS_Log d = TS_Log.of( TS_NetworkPortUtils.class);
+    final private static TS_Log d = TS_Log.of(TS_NetworkPortUtils.class);
 
     public static int MIN_PORT() {
         return 1;
@@ -31,7 +33,7 @@ public class TS_NetworkPortUtils {
         return 0.4f;
     }
 
-    private static class TaskIsReacable implements TGS_CallableType1<Optional<Integer>, TS_ThreadSyncTrigger> {
+    private static class TaskIsReacable implements TGS_CallableType1<TGS_UnionExcuse<Integer>, TS_ThreadSyncTrigger> {
 
         private final String ipAddress;
         private final int port;
@@ -44,25 +46,29 @@ public class TS_NetworkPortUtils {
         }
 
         @Override
-        public Optional<Integer> call(TS_ThreadSyncTrigger threadKiller) {
+        public TGS_UnionExcuse<Integer> call(TS_ThreadSyncTrigger threadKiller) {
             if (port % 1000 == 0) {
                 d.ci("end.ipAddress:" + ipAddress + ", port:" + port);
             }
-            return isReacable(ipAddress, port, watchDogSeconds) ? Optional.of(port) : Optional.empty();
+            var u = isReacable(ipAddress, port, watchDogSeconds);
+            if (u.isExcuse()) {
+                return u.toExcuse();
+            }
+            return TGS_UnionExcuse.of(port);
         }
     }
 
     public static List<Integer> getReachables(CharSequence ip, TS_ThreadSyncTrigger threadKiller) {
         var threadUntil = Duration.ofSeconds(2 * (long) MAX_TIMEOUT_SEC() * (MAX_PORT() - MIN_PORT()));
-        List<TGS_CallableType1<Optional<Integer>, TS_ThreadSyncTrigger>> taskList = TGS_StreamUtils.toLst(
+        List<TGS_CallableType1<TGS_UnionExcuse<Integer>, TS_ThreadSyncTrigger>> taskList = TGS_StreamUtils.toLst(
                 IntStream.range(MIN_PORT(), MAX_PORT())
                         .mapToObj(port -> new TaskIsReacable(ip, port, MAX_TIMEOUT_SEC()))
         );
         var await = TS_ThreadAsyncAwait.callParallelRateLimited(threadKiller, MAX_THREAD_COUNT(), threadUntil, taskList);
         return TGS_StreamUtils.toLst(
                 await.resultsForSuccessfulOnes.stream()
-                        .filter(r -> !r.isEmpty())
-                        .map(r -> r.get())
+                        .filter(r -> r.isPresent())
+                        .map(r -> r.value())
         );
     }
 
@@ -109,14 +115,14 @@ public class TS_NetworkPortUtils {
 //            return results;
 //        });
 //    }
-    public static boolean isReacable(CharSequence ip, int port, float watchDogSeconds) {
+    public static TGS_UnionExcuseVoid isReacable(CharSequence ip, int port, float watchDogSeconds) {
         return TGS_UnSafe.call(() -> {
             try (var socket = new Socket();) {
                 socket.connect(new InetSocketAddress(ip.toString(), port), Math.round(watchDogSeconds * 1000));
-                return true;
+                return TGS_UnionExcuseVoid.ofVoid();
             }
         }, e -> {
-            return false;
+            return TGS_UnionExcuseVoid.ofExcuse(e);
         });
     }
 
