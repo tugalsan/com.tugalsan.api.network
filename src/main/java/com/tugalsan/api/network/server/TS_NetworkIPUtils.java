@@ -9,6 +9,7 @@ import com.tugalsan.api.stream.client.TGS_StreamUtils;
 import com.tugalsan.api.string.client.*;
 import com.tugalsan.api.thread.server.async.TS_ThreadAsyncAwait;
 import com.tugalsan.api.thread.server.sync.TS_ThreadSyncTrigger;
+import com.tugalsan.api.tuple.client.TGS_Tuple1;
 import com.tugalsan.api.union.client.TGS_UnionExcuse;
 import com.tugalsan.api.union.client.TGS_UnionExcuseVoid;
 import com.tugalsan.api.unsafe.client.*;
@@ -156,7 +157,19 @@ public class TS_NetworkIPUtils {
     }
 
     public static boolean isIpLoopback(String ip) {
-        return ip.startsWith("127.");
+        if (ip.startsWith("127.")) {
+            return true;
+        }
+        if (ip.startsWith("::")) {
+            return true;
+        }
+        if (ip.startsWith("0:0:0:0:0:0:0:1")) {
+            return true;
+        }
+        if (ip.startsWith("0.0.0.0")) {
+            return true;
+        }
+        return false;
     }
 
     public static boolean isIpCastMulti(String ip) {
@@ -173,6 +186,7 @@ public class TS_NetworkIPUtils {
     }
 
     public static boolean isIpHostLocal(String ip) {
+
         if (ip.startsWith("192.168")) {
             return true;
         }
@@ -192,13 +206,9 @@ public class TS_NetworkIPUtils {
         return false;
     }
 
-    public static TGS_UnionExcuse<TS_NetworkIPs> getIPFromNetworkInterfaces() {
+    public static TGS_UnionExcuse<List<String>> getIpList_usingNetworkInterfaces() {
         return TGS_UnSafe.call(() -> {
-            Optional<String> ip_loopback = Optional.empty();
-            Optional<String> ip_castBroad = Optional.empty();
-            List<String> ip_castMulti = new ArrayList();
-            List<String> ip_hostLocal = new ArrayList();
-            List<String> ip_hostPublic = new ArrayList();
+            List<String> ips = new ArrayList();
             var e = NetworkInterface.getNetworkInterfaces();
             while (e.hasMoreElements()) {
                 var n = (NetworkInterface) e.nextElement();
@@ -206,26 +216,87 @@ public class TS_NetworkIPUtils {
                 while (ee.hasMoreElements()) {
                     var i = (InetAddress) ee.nextElement();
                     var h = i.getHostAddress();
-                    if (isIpLoopback(h)) {
-                        ip_loopback = Optional.of(h);
-                        continue;
-                    }
-                    if (isIpCastBroad(h)) {
-                        ip_castBroad = Optional.of(h);
-                        continue;
-                    }
-                    if (isIpCastMulti(h)) {
-                        ip_castMulti.add(h);
-                        continue;
-                    }
-                    if (isIpHostLocal(h)) {
-                        ip_hostLocal.add(h);
-                        continue;
-                    }
-                    ip_hostPublic.add(h);
+                    ips.add(h);
                 }
             }
-            return TGS_UnionExcuse.of(new TS_NetworkIPs(ip_loopback, ip_castBroad, ip_castMulti, ip_hostLocal, ip_hostPublic));
+            return TGS_UnionExcuse.of(ips);
+        }, e -> TGS_UnionExcuse.ofExcuse(e));
+    }
+
+    public static TGS_UnionExcuse<String> getIpList_usingInetAddress() {
+        return TGS_UnSafe.call(() -> {
+            var ip = InetAddress.getLocalHost();
+            return TGS_UnionExcuse.of(ip.getHostAddress());
+        });
+    }
+
+    public static TGS_UnionExcuse<String> getIpList_usingInetSocketAddress() {
+        return TGS_UnSafe.call(() -> {
+            try (var socket = new Socket()) {
+                socket.connect(new InetSocketAddress("google.com", 80));
+                var ip = socket.getLocalAddress().toString();
+                if (ip != null && ip.startsWith("/")) {
+                    ip = ip.substring(1);
+                }
+                return TGS_UnionExcuse.of(ip);
+            }
+        }, e -> TGS_UnionExcuse.ofExcuse(e));
+    }
+
+    public static TGS_UnionExcuse<List<String>> getIpList_usingAll() {
+        var inter = getIpList_usingNetworkInterfaces();
+        if (inter.isExcuse()) {
+            return inter.toExcuse();
+        }
+        var lst = inter.value();
+        var soc = getIpList_usingInetSocketAddress();
+        if (soc.isPresent() && lst.stream().filter(o -> o.equals(soc.value())).findAny().isEmpty()) {
+            inter.value().add(soc.value());
+        }
+        var inet = getIpList_usingInetAddress();
+        if (inet.isPresent() && lst.stream().filter(o -> o.equals(inet.value())).findAny().isEmpty()) {
+            inter.value().add(inet.value());
+        }
+        return inter;
+    }
+
+    public static TGS_UnionExcuse<TS_NetworkIPs> getIPs() {
+        return TGS_UnSafe.call(() -> {
+            var u_ipAll = getIpList_usingAll();
+            if (u_ipAll.isExcuse()) {
+                return u_ipAll.toExcuse();
+            }
+            TGS_Tuple1< String> ip_loopback = TGS_Tuple1.of();
+            TGS_Tuple1< String> ip_castBroad = TGS_Tuple1.of();
+            List<String> ip_castMulti = new ArrayList();
+            List<String> ip_hostLocal = new ArrayList();
+            List<String> ip_hostPublic = new ArrayList();
+            u_ipAll.value().forEach(ip -> {
+                if (isIpLoopback(ip)) {
+                    ip_loopback.value0 = ip;
+                    return;
+                }
+                if (isIpCastBroad(ip)) {
+                    ip_castBroad.value0 = ip;
+                    return;
+                }
+                if (isIpCastMulti(ip)) {
+                    ip_castMulti.add(ip);
+                    return;
+                }
+                if (isIpHostLocal(ip)) {
+                    ip_hostLocal.add(ip);
+                    return;
+                }
+                ip_hostPublic.add(ip);
+            });
+            return TGS_UnionExcuse.of(new TS_NetworkIPs(
+                    ip_loopback.value0 == null ? Optional.empty() : Optional.of(ip_loopback.value0),
+                    ip_castBroad.value0 == null ? Optional.empty() : Optional.of(ip_castBroad.value0),
+                    ip_castMulti,
+                    ip_hostLocal,
+                    ip_hostPublic
+            ));
         }, e -> TGS_UnionExcuse.ofExcuse(e));
     }
 
