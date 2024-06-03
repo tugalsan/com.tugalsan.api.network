@@ -198,6 +198,7 @@ public class TS_NetworkIPUtils {
             Optional<String> ip_castBroad = Optional.empty();
             List<String> ip_castMulti = new ArrayList();
             List<String> ip_hostLocal = new ArrayList();
+            List<String> ip_hostPublic = new ArrayList();
             var e = NetworkInterface.getNetworkInterfaces();
             while (e.hasMoreElements()) {
                 var n = (NetworkInterface) e.nextElement();
@@ -221,10 +222,10 @@ public class TS_NetworkIPUtils {
                         ip_hostLocal.add(h);
                         continue;
                     }
-                    TGS_UnionExcuse.of(h);
+                    ip_hostPublic.add(h);
                 }
             }
-            return TGS_UnionExcuse.of(new TS_NetworkIPs(ip_loopback, ip_castBroad, ip_castMulti, ip_hostLocal));
+            return TGS_UnionExcuse.of(new TS_NetworkIPs(ip_loopback, ip_castBroad, ip_castMulti, ip_hostLocal, ip_hostPublic));
         }, e -> TGS_UnionExcuse.ofExcuse(e));
     }
 
