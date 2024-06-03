@@ -38,13 +38,6 @@ public class TS_NetworkIPUtils {
         return 10;
     }
 
-    public static void logIPServerAndIpRouter() {
-        TGS_UnSafe.run(() -> {
-            d.cr("logIPServerAndIpRouter", "getIPServer()", TS_NetworkIPUtils.getIPServer_ifConnectedToInternet());
-            d.cr("logIPServerAndIpRouter", "getIPRouter()", TS_NetworkIPUtils.getIPRouter());
-        }, e -> d.ce("logIPServerAndIpRouter", "ERROR: Possibly no internet connection!", e.getMessage()));
-    }
-
     private static class TaskIsReacable implements TGS_CallableType1<TGS_UnionExcuse<String>, TS_ThreadSyncTrigger> {
 
         private final String ipAddress;
@@ -162,23 +155,76 @@ public class TS_NetworkIPUtils {
         return TGS_UnSafe.thrw(d.className, "get_IP_CONFIG_ALL", "UnknownOs: " + System.getProperty("os.name"));
     }
 
-    public static String getIPRouter() {
-        return TGS_UnSafe.call(() -> {
-            var ip = InetAddress.getLocalHost();
-            return ip.getHostAddress();
-        });
+    public static boolean isIpLoopback(String ip) {
+        return ip.startsWith("127.");
     }
 
-    public static TGS_UnionExcuse<String> getIPServer_ifConnectedToInternet() {
-        return TGS_UnSafe.call(() -> {
-            try (var socket = new Socket()) {
-                socket.connect(new InetSocketAddress("google.com", 80));
-                var ip = socket.getLocalAddress().toString();
-                if (ip != null && ip.startsWith("/")) {
-                    ip = ip.substring(1);
-                }
-                return TGS_UnionExcuse.of(ip);
+    public static boolean isIpCastMulti(String ip) {
+        for (var t = 224; t < 240; t++) {
+            if (ip.startsWith(t + ".")) {
+                return true;
             }
+        }
+        return false;
+    }
+
+    public static boolean isIpCastBroad(String ip) {
+        return ip.startsWith("255.255.255.255");
+    }
+
+    public static boolean isIpHostLocal(String ip) {
+        if (ip.startsWith("192.168")) {
+            return true;
+        }
+        if (ip.startsWith("10.")) {
+            return true;
+        }
+        if (ip.startsWith("169.254")) {
+            return true;
+        }
+        if (ip.startsWith("172.")) {
+            for (var t = 16; t < 32; t++) {
+                if (ip.startsWith("172." + t)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static TGS_UnionExcuse<TS_NetworkIPs> getIPFromNetworkInterfaces() {
+        return TGS_UnSafe.call(() -> {
+            Optional<String> ip_loopback = Optional.empty();
+            Optional<String> ip_castBroad = Optional.empty();
+            List<String> ip_castMulti = new ArrayList();
+            List<String> ip_hostLocal = new ArrayList();
+            var e = NetworkInterface.getNetworkInterfaces();
+            while (e.hasMoreElements()) {
+                var n = (NetworkInterface) e.nextElement();
+                var ee = n.getInetAddresses();
+                while (ee.hasMoreElements()) {
+                    var i = (InetAddress) ee.nextElement();
+                    var h = i.getHostAddress();
+                    if (isIpLoopback(h)) {
+                        ip_loopback = Optional.of(h);
+                        continue;
+                    }
+                    if (isIpCastBroad(h)) {
+                        ip_castBroad = Optional.of(h);
+                        continue;
+                    }
+                    if (isIpCastMulti(h)) {
+                        ip_castMulti.add(h);
+                        continue;
+                    }
+                    if (isIpHostLocal(h)) {
+                        ip_hostLocal.add(h);
+                        continue;
+                    }
+                    TGS_UnionExcuse.of(h);
+                }
+            }
+            return TGS_UnionExcuse.of(new TS_NetworkIPs(ip_loopback, ip_castBroad, ip_castMulti, ip_hostLocal));
         }, e -> TGS_UnionExcuse.ofExcuse(e));
     }
 
