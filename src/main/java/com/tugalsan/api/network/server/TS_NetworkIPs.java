@@ -8,10 +8,10 @@ public record TS_NetworkIPs(Optional<String> ip_loopback,
         Optional<String> ip_castBroad,
         List<String> ip_castMulti,
         List<String> ip_hostLocal,
-        List<String> ip_hostPublic) {
+        List<String> ip_hostOther) {
 
-    public boolean ip_hostPublic_contains(String ipTarget) {
-        return ip_hostPublic.stream().filter(ipSource -> Objects.equals(ipSource, ipTarget)).findAny().isPresent();
+    public boolean ip_hostOther_contains(String ipTarget) {
+        return ip_hostOther.stream().filter(ipSource -> Objects.equals(ipSource, ipTarget)).findAny().isPresent();
     }
 
     public boolean ip_hostLocal_contains(String ipTarget) {

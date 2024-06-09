@@ -270,7 +270,7 @@ public class TS_NetworkIPUtils {
             TGS_Tuple1< String> ip_castBroad = TGS_Tuple1.of();
             List<String> ip_castMulti = new ArrayList();
             List<String> ip_hostLocal = new ArrayList();
-            List<String> ip_hostPublic = new ArrayList();
+            List<String> ip_hostOther = new ArrayList();
             u_ipAll.value().forEach(ip -> {
                 if (isIpLoopback(ip)) {
                     ip_loopback.value0 = ip;
@@ -288,14 +288,14 @@ public class TS_NetworkIPUtils {
                     ip_hostLocal.add(ip);
                     return;
                 }
-                ip_hostPublic.add(ip);
+                ip_hostOther.add(ip);
             });
             return TGS_UnionExcuse.of(new TS_NetworkIPs(
                     ip_loopback.value0 == null ? Optional.empty() : Optional.of(ip_loopback.value0),
                     ip_castBroad.value0 == null ? Optional.empty() : Optional.of(ip_castBroad.value0),
                     ip_castMulti,
                     ip_hostLocal,
-                    ip_hostPublic
+                    ip_hostOther
             ));
         }, e -> TGS_UnionExcuse.ofExcuse(e));
     }
