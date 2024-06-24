@@ -10,7 +10,7 @@ module com.tugalsan.api.network {
     requires com.tugalsan.api.list;
     requires com.tugalsan.api.stream;
     requires com.tugalsan.api.thread;
-    requires com.tugalsan.api.runnable;
+    
     requires com.tugalsan.api.charset;
     requires com.tugalsan.api.callable;
     exports com.tugalsan.api.network.client;
