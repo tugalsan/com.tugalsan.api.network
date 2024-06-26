@@ -66,7 +66,7 @@ public class TS_NetworkIPUtils {
         var threadUntil = Duration.ofSeconds(2 * (long) MAX_TIMEOUT_SEC() * (MAX_IP() - MIN_IP()));
         List<TGS_CallableType1<TGS_UnionExcuse<String>, TS_ThreadSyncTrigger>> taskList = TGS_StreamUtils.toLst(
                 IntStream.range(MIN_IP(), MAX_IP())
-                        .mapToObj(ipPartD -> TGS_StringUtils.concat(ipClassC, ".", String.valueOf(ipPartD)))
+                        .mapToObj(ipPartD -> TGS_StringUtils.cmn().concat(ipClassC, ".", String.valueOf(ipPartD)))
                         .map(ipNext -> new TaskIsReacable(ipNext, MAX_TIMEOUT_SEC()))
         );
         var await = TS_ThreadAsyncAwait.callParallelRateLimited(threadKiller, MAX_THREAD_COUNT(), threadUntil, taskList);
@@ -101,7 +101,7 @@ public class TS_NetworkIPUtils {
 //        return TGS_UnSafe.call(() -> {
 //            List<TaskIsReacable> taskList = TGS_ListUtils.of();
 //            IntStream.range(MIN_IP(), MAX_IP()).forEachOrdered(ipPartD -> {
-//                var ipNext = TGS_StringUtils.concat(ipClassC, ".", String.valueOf(ipPartD));
+//                var ipNext = TGS_StringUtils.cmn().concat(ipClassC, ".", String.valueOf(ipPartD));
 //                taskList.add(new TaskIsReacable(ipNext, MAX_TIMEOUT_SEC()));
 //            });
 //            var executor = useVirtualThread
