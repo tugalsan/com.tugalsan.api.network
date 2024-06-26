@@ -2,6 +2,7 @@ module com.tugalsan.api.network {
     requires javax.servlet.api;
     requires com.tugalsan.api.os;
     requires com.tugalsan.api.unsafe;
+    requires com.tugalsan.api.time;
     requires com.tugalsan.api.string;
     requires com.tugalsan.api.tuple;
     requires com.tugalsan.api.union;

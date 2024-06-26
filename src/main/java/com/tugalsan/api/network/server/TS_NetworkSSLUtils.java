@@ -1,13 +1,30 @@
 package com.tugalsan.api.network.server;
 
+import com.tugalsan.api.time.client.TGS_Time;
 import com.tugalsan.api.union.client.TGS_UnionExcuse;
 import com.tugalsan.api.unsafe.client.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import javax.net.ssl.*;
 import java.security.*;
 import java.security.cert.*;
 import java.util.*;
 
 public class TS_NetworkSSLUtils {
+
+    public static TGS_UnionExcuse<TGS_Time> expirationOfPem(Path pemPath) {
+        try {
+            var bytes = Files.readAllBytes(pemPath);
+            var cert = (X509Certificate) CertificateFactory.getInstance("X509").generateCertificate(new ByteArrayInputStream(bytes));
+            var date = cert.getNotAfter();
+            var time = TGS_Time.of(date);
+            return TGS_UnionExcuse.of(time);
+        } catch (CertificateException | IOException e) {
+            return TGS_UnionExcuse.ofExcuse(e);
+        }
+    }
 
     //https://mkyong.com/java/java-https-client-httpsurlconnection-example/
     public static TGS_UnionExcuse<StringBuffer> info(HttpsURLConnection con) {
