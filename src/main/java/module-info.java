@@ -13,7 +13,7 @@ module com.tugalsan.api.network {
     requires com.tugalsan.api.thread;
     
     requires com.tugalsan.api.charset;
-    requires com.tugalsan.api.callable;
+    requires com.tugalsan.api.function;
     exports com.tugalsan.api.network.client;
     exports com.tugalsan.api.network.server;
 }

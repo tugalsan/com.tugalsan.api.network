@@ -1,6 +1,6 @@
 package com.tugalsan.api.network.server;
 
-import com.tugalsan.api.callable.client.TGS_CallableType1;
+import com.tugalsan.api.function.client.TGS_Func_OutTyped_In1;
 import com.tugalsan.api.log.server.TS_Log;
 import com.tugalsan.api.stream.client.TGS_StreamUtils;
 import com.tugalsan.api.thread.server.async.TS_ThreadAsyncAwait;
@@ -33,7 +33,7 @@ public class TS_NetworkPortUtils {
         return 0.4f;
     }
 
-    private static class TaskIsReacable implements TGS_CallableType1<TGS_UnionExcuse<Integer>, TS_ThreadSyncTrigger> {
+    private static class TaskIsReacable implements TGS_Func_OutTyped_In1<TGS_UnionExcuse<Integer>, TS_ThreadSyncTrigger> {
 
         private final String ipAddress;
         private final int port;
@@ -60,7 +60,7 @@ public class TS_NetworkPortUtils {
 
     public static List<Integer> getReachables(CharSequence ip, TS_ThreadSyncTrigger threadKiller) {
         var threadUntil = Duration.ofSeconds(2 * (long) MAX_TIMEOUT_SEC() * (MAX_PORT() - MIN_PORT()));
-        List<TGS_CallableType1<TGS_UnionExcuse<Integer>, TS_ThreadSyncTrigger>> taskList = TGS_StreamUtils.toLst(
+        List<TGS_Func_OutTyped_In1<TGS_UnionExcuse<Integer>, TS_ThreadSyncTrigger>> taskList = TGS_StreamUtils.toLst(
                 IntStream.range(MIN_PORT(), MAX_PORT())
                         .mapToObj(port -> new TaskIsReacable(ip, port, MAX_TIMEOUT_SEC()))
         );

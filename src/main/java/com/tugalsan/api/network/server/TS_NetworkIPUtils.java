@@ -1,6 +1,6 @@
 package com.tugalsan.api.network.server;
 
-import com.tugalsan.api.callable.client.TGS_CallableType1;
+import com.tugalsan.api.function.client.TGS_Func_OutTyped_In1;
 import com.tugalsan.api.charset.client.TGS_CharSetCast;
 import com.tugalsan.api.log.server.*;
 import com.tugalsan.api.network.client.TGS_NetworkIPUtils;
@@ -39,7 +39,7 @@ public class TS_NetworkIPUtils {
         return 10;
     }
 
-    private static class TaskIsReacable implements TGS_CallableType1<TGS_UnionExcuse<String>, TS_ThreadSyncTrigger> {
+    private static class TaskIsReacable implements TGS_Func_OutTyped_In1<TGS_UnionExcuse<String>, TS_ThreadSyncTrigger> {
 
         private final String ipAddress;
         private final int watchDogSeconds;
@@ -64,7 +64,7 @@ public class TS_NetworkIPUtils {
 
     public static List<String> getReachables(CharSequence ipClassC, TS_ThreadSyncTrigger threadKiller) {
         var threadUntil = Duration.ofSeconds(2 * (long) MAX_TIMEOUT_SEC() * (MAX_IP() - MIN_IP()));
-        List<TGS_CallableType1<TGS_UnionExcuse<String>, TS_ThreadSyncTrigger>> taskList = TGS_StreamUtils.toLst(
+        List<TGS_Func_OutTyped_In1<TGS_UnionExcuse<String>, TS_ThreadSyncTrigger>> taskList = TGS_StreamUtils.toLst(
                 IntStream.range(MIN_IP(), MAX_IP())
                         .mapToObj(ipPartD -> TGS_StringUtils.cmn().concat(ipClassC, ".", String.valueOf(ipPartD)))
                         .map(ipNext -> new TaskIsReacable(ipNext, MAX_TIMEOUT_SEC()))
