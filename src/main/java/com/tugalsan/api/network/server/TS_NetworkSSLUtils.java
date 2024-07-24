@@ -1,5 +1,6 @@
 package com.tugalsan.api.network.server;
 
+import com.tugalsan.api.function.client.TGS_Func;
 import com.tugalsan.api.time.client.TGS_Time;
 import com.tugalsan.api.union.client.TGS_UnionExcuse;
 import com.tugalsan.api.unsafe.client.*;
@@ -67,6 +68,6 @@ public class TS_NetworkSSLUtils {
             }, new SecureRandom());
             HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
             HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
-        }, e -> TGS_UnSafe.runNothing());
+        }, e -> TGS_Func.empty.run());
     }
 }

@@ -11,9 +11,8 @@ module com.tugalsan.api.network {
     requires com.tugalsan.api.list;
     requires com.tugalsan.api.stream;
     requires com.tugalsan.api.thread;
-    
-    requires com.tugalsan.api.charset;
     requires com.tugalsan.api.function;
+    requires com.tugalsan.api.charset;
     exports com.tugalsan.api.network.client;
     exports com.tugalsan.api.network.server;
 }
