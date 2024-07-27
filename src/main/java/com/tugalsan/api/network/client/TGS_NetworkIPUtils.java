@@ -24,7 +24,8 @@ public class TGS_NetworkIPUtils {
         return Objects.equals(domainOrIp, "localhost")
                 || Objects.equals(domainOrIp, "127.0.0.1")
                 || Objects.equals(domainOrIp, "0:0:0:0:0:0:0:1")
-                || Objects.equals(domainOrIp, "::1");
+                || Objects.equals(domainOrIp, "::1")
+                || Objects.equals(domainOrIp, "::1:");
     }
 
     public static boolean isLocalClientA(CharSequence clientIp) {
