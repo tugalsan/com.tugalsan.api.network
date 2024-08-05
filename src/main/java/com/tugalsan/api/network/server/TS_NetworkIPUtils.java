@@ -18,11 +18,11 @@ import java.time.Duration;
 import java.util.*;
 import java.util.stream.*;
 import javax.servlet.http.*;
- 
+
 public class TS_NetworkIPUtils {
 
     final private static TS_Log d = TS_Log.of(TS_NetworkIPUtils.class);
- 
+
     public static int MIN_IP() {
         return 0;
     }
@@ -156,7 +156,7 @@ public class TS_NetworkIPUtils {
         return TGS_UnSafe.thrw(d.className, "get_IP_CONFIG_ALL", "UnknownOs: " + System.getProperty("os.name"));
     }
 
-    public static boolean isIpLoopback(String ip) {
+    public static boolean is_ip_localHost_loopBack(String ip) {
         if (ip.startsWith("127.")) {
             return true;
         }
@@ -172,7 +172,7 @@ public class TS_NetworkIPUtils {
         return false;
     }
 
-    public static boolean isIpCastMulti(String ip) {
+    public static boolean is_ip_multiCast(String ip) {
         for (var t = 224; t < 240; t++) {
             if (ip.startsWith(t + ".")) {
                 return true;
@@ -181,11 +181,11 @@ public class TS_NetworkIPUtils {
         return false;
     }
 
-    public static boolean isIpCastBroad(String ip) {
+    public static boolean is_ip_broadCast(String ip) {
         return ip.startsWith("255.255.255.255");
     }
 
-    public static boolean isIpHostLocal(String ip) {
+    public static boolean is_ip_localNetwork(String ip) {
 
         if (ip.startsWith("192.168")) {
             return true;
@@ -266,36 +266,36 @@ public class TS_NetworkIPUtils {
             if (u_ipAll.isExcuse()) {
                 return u_ipAll.toExcuse();
             }
-            TGS_Tuple1< String> ip_loopback = TGS_Tuple1.of();
-            TGS_Tuple1< String> ip_castBroad = TGS_Tuple1.of();
-            List<String> ip_castMulti = new ArrayList();
-            List<String> ip_hostLocal = new ArrayList();
-            List<String> ip_hostOther = new ArrayList();
+            TGS_Tuple1<String> ip_localHost_loopBack = TGS_Tuple1.of();
+            TGS_Tuple1<String> ip_broadCast = TGS_Tuple1.of(); 
+            List<String> ip_multiCast = new ArrayList();
+            List<String> ip_localNetwork = new ArrayList();
+            List<String> ip_other = new ArrayList();
             u_ipAll.value().forEach(ip -> {
-                if (isIpLoopback(ip)) {
-                    ip_loopback.value0 = ip;
+                if (is_ip_localHost_loopBack(ip)) {
+                    ip_localHost_loopBack.value0 = ip;
                     return;
                 }
-                if (isIpCastBroad(ip)) {
-                    ip_castBroad.value0 = ip;
+                if (is_ip_broadCast(ip)) {
+                    ip_broadCast.value0 = ip;
                     return;
                 }
-                if (isIpCastMulti(ip)) {
-                    ip_castMulti.add(ip);
+                if (is_ip_multiCast(ip)) {
+                    ip_multiCast.add(ip);
                     return;
                 }
-                if (isIpHostLocal(ip)) {
-                    ip_hostLocal.add(ip);
+                if (is_ip_localNetwork(ip)) {
+                    ip_localNetwork.add(ip);
                     return;
                 }
-                ip_hostOther.add(ip);
+                ip_other.add(ip);
             });
             return TGS_UnionExcuse.of(new TS_NetworkIPs(
-                    ip_loopback.value0 == null ? Optional.empty() : Optional.of(ip_loopback.value0),
-                    ip_castBroad.value0 == null ? Optional.empty() : Optional.of(ip_castBroad.value0),
-                    ip_castMulti,
-                    ip_hostLocal,
-                    ip_hostOther
+                    ip_localHost_loopBack.value0 == null ? Optional.empty() : Optional.of(ip_localHost_loopBack.value0),
+                    ip_broadCast.value0 == null ? Optional.empty() : Optional.of(ip_broadCast.value0),
+                    ip_multiCast,
+                    ip_localNetwork,
+                    ip_other
             ));
         }, e -> TGS_UnionExcuse.ofExcuse(e));
     }
