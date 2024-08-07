@@ -186,7 +186,6 @@ public class TS_NetworkIPUtils {
     }
 
     public static boolean is_ip_localNetwork(String ip) {
-
         if (ip.startsWith("192.168")) {
             return true;
         }
