@@ -29,7 +29,7 @@ public class TS_NetworkSSLUtils {
         listCer.forEach(p12 -> {
             var u_certs = TS_NetworkSSLUtils.toCertificatesFromCer(p12);
             if (u_certs.isExcuse()) {
-                d.ce("run", "skip p12 certificate", p12, u_certs.excuse().getMessage());
+                d.ce("run", "skip cer certificate", p12, u_certs.excuse().getMessage());
                 return;
             }
             trustedLocalCertificates.addAll(u_certs.value());
@@ -38,7 +38,7 @@ public class TS_NetworkSSLUtils {
         listCrt.forEach(p12 -> {
             var u_certs = TS_NetworkSSLUtils.toCertificatesFromCrt(p12);
             if (u_certs.isExcuse()) {
-                d.ce("run", "skip p12 certificate", p12, u_certs.excuse().getMessage());
+                d.ce("run", "skip crt certificate", p12, u_certs.excuse().getMessage());
                 return;
             }
             trustedLocalCertificates.addAll(u_certs.value());
@@ -47,7 +47,7 @@ public class TS_NetworkSSLUtils {
         listDer.forEach(p12 -> {
             var u_certs = TS_NetworkSSLUtils.toCertificatesFromDer(p12);
             if (u_certs.isExcuse()) {
-                d.ce("run", "skip p12 certificate", p12, u_certs.excuse().getMessage());
+                d.ce("run", "skip der certificate", p12, u_certs.excuse().getMessage());
                 return;
             }
             trustedLocalCertificates.addAll(u_certs.value());
@@ -56,7 +56,7 @@ public class TS_NetworkSSLUtils {
         listPem.forEach(p12 -> {
             var u_certs = TS_NetworkSSLUtils.toCertificatesFromPem(p12);
             if (u_certs.isExcuse()) {
-                d.ce("run", "skip p12 certificate", p12, u_certs.excuse().getMessage());
+                d.ce("run", "skip pem certificate", p12, u_certs.excuse().getMessage());
                 return;
             }
             trustedLocalCertificates.addAll(u_certs.value());
