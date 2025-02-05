@@ -1,10 +1,12 @@
 package com.tugalsan.api.network.server;
 
 import com.tugalsan.api.function.client.TGS_Func;
+import com.tugalsan.api.network.server.core.PemImporterUtils;
 import com.tugalsan.api.stream.client.TGS_StreamUtils;
 import com.tugalsan.api.time.client.TGS_Time;
 import com.tugalsan.api.union.client.TGS_UnionExcuse;
 import com.tugalsan.api.unsafe.client.*;
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -17,7 +19,64 @@ import java.util.*;
 
 public class TS_NetworkSSLUtils {
 
-    public static TGS_UnionExcuse<KeyStore> sniffFromP12ToKeyStore(Path p12, CharSequence pass) {
+    public static TGS_UnionExcuse<List<Certificate>> toCertificatesFromCrt(Path crtCert) {
+        return toCertificatesFromCer(crtCert);
+    }
+
+    public static TGS_UnionExcuse<List<Certificate>> toCertificatesFromCer(Path cerCert) {
+        var u_der = toCertificatesFromDer(cerCert);
+        if (!u_der.isExcuse()) {
+            return u_der;
+        }
+        return toCertificatesFromPem(cerCert);
+    }
+
+    public static TGS_UnionExcuse<List<Certificate>> toCertificatesFromDer(Path derCert) {
+        return TGS_UnSafe.call(() -> {
+            List<Certificate> certificates = new ArrayList();
+            try (var is = new BufferedInputStream(Files.newInputStream(derCert))) {
+                var cf = CertificateFactory.getInstance("X.509");
+                while (is.available() > 0) {
+                    var cert = cf.generateCertificate(is);
+                    certificates.add(cert);
+                }
+            }
+            return TGS_UnionExcuse.of(certificates);
+        }, e -> TGS_UnionExcuse.ofExcuse(e));
+    }
+
+    public static TGS_UnionExcuse<List<Certificate>> toCertificatesFromPem(Path pemCert) {
+        return TGS_UnSafe.call(() -> {
+            var certififactes = PemImporterUtils.createCertificates(pemCert.toFile());
+            return TGS_UnionExcuse.of(Arrays.asList(certififactes));
+        }, e -> TGS_UnionExcuse.ofExcuse(e));
+    }
+
+    public static TGS_UnionExcuse<List<Certificate>> toCertificatesFromP12(Path p12, CharSequence pass, boolean withChain) {
+        return TGS_UnSafe.call(() -> {
+            var u_store = toKeyStoreFromP12(p12, pass);
+            if (u_store.isExcuse()) {
+                TGS_UnSafe.thrw(u_store.excuse());
+            }
+            return toCertificates(u_store.value(), withChain);
+        }, e -> TGS_UnionExcuse.ofExcuse(e));
+    }
+
+    public static TGS_UnionExcuse<SSLServerSocketFactory> toSSLServerSocketFactoryFromPEM(Path pemPrivateKey, Path pemCert, CharSequence pass) {
+        return TGS_UnSafe.call(() -> {
+            var store = PemImporterUtils.createSSLFactory(pemPrivateKey.toFile(), pemCert.toFile(), pass.toString());
+            return TGS_UnionExcuse.of(store);
+        }, e -> TGS_UnionExcuse.ofExcuse(e));
+    }
+
+    public static TGS_UnionExcuse<KeyStore> toKeyStoreFromPEM(Path pemPrivateKey, Path pemCert, CharSequence pass) {
+        return TGS_UnSafe.call(() -> {
+            var store = PemImporterUtils.createKeyStore(pemPrivateKey.toFile(), pemCert.toFile(), pass.toString());
+            return TGS_UnionExcuse.of(store);
+        }, e -> TGS_UnionExcuse.ofExcuse(e));
+    }
+
+    public static TGS_UnionExcuse<KeyStore> toKeyStoreFromP12(Path p12, CharSequence pass) {
         return TGS_UnSafe.call(() -> {
             var store = KeyStore.getInstance("PKCS12");
             store.load(Files.newInputStream(p12), pass.toString().toCharArray());
@@ -25,14 +84,9 @@ public class TS_NetworkSSLUtils {
         }, e -> TGS_UnionExcuse.ofExcuse(e));
     }
 
-    public static TGS_UnionExcuse<PrivateKey> sniffFromP12ToPrivateKey(Path p12, CharSequence pass) {
+    public static TGS_UnionExcuse<PrivateKey> toPrivateKey(KeyStore store, CharSequence pass) {
         return TGS_UnSafe.call(() -> {
-            var u_store = sniffFromP12ToKeyStore(p12, pass);
-            if (u_store.isExcuse()) {
-                TGS_UnSafe.thrw(u_store.excuse());
-            }
-            u_store.value().load(Files.newInputStream(p12), pass.toString().toCharArray());
-            var privateKey = (PrivateKey) u_store.value().getKey("example", pass.toString().toCharArray());
+            var privateKey = (PrivateKey) store.getKey("example", pass.toString().toCharArray());
             if (privateKey == null) {
                 TGS_UnSafe.thrw(new NullPointerException("no private key exists"));
             }
@@ -40,18 +94,14 @@ public class TS_NetworkSSLUtils {
         }, e -> TGS_UnionExcuse.ofExcuse(e));
     }
 
-    public static TGS_UnionExcuse<List<Certificate>> sniffFromToCertificatesP12(Path p12, CharSequence pass, boolean withChain) {
+    public static TGS_UnionExcuse<List<Certificate>> toCertificates(KeyStore store, boolean withChain) {
         return TGS_UnSafe.call(() -> {
             List<Certificate> certificates = new ArrayList();
-            var u_store = sniffFromP12ToKeyStore(p12, pass);
-            if (u_store.isExcuse()) {
-                TGS_UnSafe.thrw(u_store.excuse());
-            }
-            var aliases = TGS_StreamUtils.of(u_store.value().aliases()).toList();
+            var aliases = TGS_StreamUtils.of(store.aliases()).toList();
             for (var alias : aliases) {
-                var cert_main = u_store.value().getCertificate(alias);
+                var cert_main = store.getCertificate(alias);
                 certificates.add(cert_main);
-                certificates.addAll(Arrays.asList(u_store.value().getCertificateChain(alias)));
+                certificates.addAll(Arrays.asList(store.getCertificateChain(alias)));
             }
             return TGS_UnionExcuse.of(certificates);
         }, e -> TGS_UnionExcuse.ofExcuse(e));
