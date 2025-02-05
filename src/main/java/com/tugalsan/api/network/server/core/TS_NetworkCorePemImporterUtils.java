@@ -25,7 +25,7 @@ import javax.net.ssl.SSLServerSocketFactory;
 import javax.xml.bind.DatatypeConverter;
 
 //SOURCE https://stackoverflow.com/questions/2138940/import-pem-into-java-key-store
-public class PemImporterUtils {
+public class TS_NetworkCorePemImporterUtils {
 
     public static SSLServerSocketFactory createSSLFactory(File privateKeyPem, File certificatePem, String password) throws Exception {
         final SSLContext context = SSLContext.getInstance("TLS");

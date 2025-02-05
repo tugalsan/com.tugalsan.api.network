@@ -1,7 +1,9 @@
 package com.tugalsan.api.network.server;
 
 import com.tugalsan.api.function.client.TGS_Func;
-import com.tugalsan.api.network.server.core.PemImporterUtils;
+import com.tugalsan.api.log.server.TS_Log;
+import com.tugalsan.api.network.server.core.TS_NetworkCoreDirectoryUtils;
+import com.tugalsan.api.network.server.core.TS_NetworkCorePemImporterUtils;
 import com.tugalsan.api.stream.client.TGS_StreamUtils;
 import com.tugalsan.api.time.client.TGS_Time;
 import com.tugalsan.api.union.client.TGS_UnionExcuse;
@@ -18,6 +20,58 @@ import java.security.cert.Certificate;
 import java.util.*;
 
 public class TS_NetworkSSLUtils {
+
+    final static private TS_Log d = TS_Log.of(TS_NetworkSSLUtils.class);
+
+    public static List<Certificate> toCertificatesFromDirectory(Path dirSSL, CharSequence p12Pass) {
+        List<Certificate> trustedLocalCertificates = new ArrayList();
+        var listCer = TS_NetworkCoreDirectoryUtils.subFiles(dirSSL, "*.cer", true, true);
+        listCer.forEach(p12 -> {
+            var u_certs = TS_NetworkSSLUtils.toCertificatesFromCer(p12);
+            if (u_certs.isExcuse()) {
+                d.ce("run", "skip p12 certificate", p12, u_certs.excuse().getMessage());
+                return;
+            }
+            trustedLocalCertificates.addAll(u_certs.value());
+        });
+        var listCrt = TS_NetworkCoreDirectoryUtils.subFiles(dirSSL, "*.crt", true, true);
+        listCrt.forEach(p12 -> {
+            var u_certs = TS_NetworkSSLUtils.toCertificatesFromCrt(p12);
+            if (u_certs.isExcuse()) {
+                d.ce("run", "skip p12 certificate", p12, u_certs.excuse().getMessage());
+                return;
+            }
+            trustedLocalCertificates.addAll(u_certs.value());
+        });
+        var listDer = TS_NetworkCoreDirectoryUtils.subFiles(dirSSL, "*.der", true, true);
+        listDer.forEach(p12 -> {
+            var u_certs = TS_NetworkSSLUtils.toCertificatesFromDer(p12);
+            if (u_certs.isExcuse()) {
+                d.ce("run", "skip p12 certificate", p12, u_certs.excuse().getMessage());
+                return;
+            }
+            trustedLocalCertificates.addAll(u_certs.value());
+        });
+        var listPem = TS_NetworkCoreDirectoryUtils.subFiles(dirSSL, "*.pem", true, true);
+        listPem.forEach(p12 -> {
+            var u_certs = TS_NetworkSSLUtils.toCertificatesFromPem(p12);
+            if (u_certs.isExcuse()) {
+                d.ce("run", "skip p12 certificate", p12, u_certs.excuse().getMessage());
+                return;
+            }
+            trustedLocalCertificates.addAll(u_certs.value());
+        });
+        var listP12 = TS_NetworkCoreDirectoryUtils.subFiles(dirSSL, "*.p12", true, true);
+        listP12.forEach(p12 -> {
+            var u_certs = TS_NetworkSSLUtils.toCertificatesFromP12(p12, p12Pass, true);
+            if (u_certs.isExcuse()) {
+                d.ce("run", "skip p12 certificate", p12, u_certs.excuse().getMessage());
+                return;
+            }
+            trustedLocalCertificates.addAll(u_certs.value());
+        });
+        return trustedLocalCertificates;
+    }
 
     public static TGS_UnionExcuse<List<Certificate>> toCertificatesFromCrt(Path crtCert) {
         return toCertificatesFromCer(crtCert);
@@ -47,7 +101,7 @@ public class TS_NetworkSSLUtils {
 
     public static TGS_UnionExcuse<List<Certificate>> toCertificatesFromPem(Path pemCert) {
         return TGS_UnSafe.call(() -> {
-            var certififactes = PemImporterUtils.createCertificates(pemCert.toFile());
+            var certififactes = TS_NetworkCorePemImporterUtils.createCertificates(pemCert.toFile());
             return TGS_UnionExcuse.of(Arrays.asList(certififactes));
         }, e -> TGS_UnionExcuse.ofExcuse(e));
     }
@@ -64,14 +118,14 @@ public class TS_NetworkSSLUtils {
 
     public static TGS_UnionExcuse<SSLServerSocketFactory> toSSLServerSocketFactoryFromPEM(Path pemPrivateKey, Path pemCert, CharSequence pass) {
         return TGS_UnSafe.call(() -> {
-            var store = PemImporterUtils.createSSLFactory(pemPrivateKey.toFile(), pemCert.toFile(), pass.toString());
+            var store = TS_NetworkCorePemImporterUtils.createSSLFactory(pemPrivateKey.toFile(), pemCert.toFile(), pass.toString());
             return TGS_UnionExcuse.of(store);
         }, e -> TGS_UnionExcuse.ofExcuse(e));
     }
 
     public static TGS_UnionExcuse<KeyStore> toKeyStoreFromPEM(Path pemPrivateKey, Path pemCert, CharSequence pass) {
         return TGS_UnSafe.call(() -> {
-            var store = PemImporterUtils.createKeyStore(pemPrivateKey.toFile(), pemCert.toFile(), pass.toString());
+            var store = TS_NetworkCorePemImporterUtils.createKeyStore(pemPrivateKey.toFile(), pemCert.toFile(), pass.toString());
             return TGS_UnionExcuse.of(store);
         }, e -> TGS_UnionExcuse.ofExcuse(e));
     }
