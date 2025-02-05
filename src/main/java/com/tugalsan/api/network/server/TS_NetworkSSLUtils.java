@@ -112,7 +112,7 @@ public class TS_NetworkSSLUtils {
             if (u_store.isExcuse()) {
                 TGS_UnSafe.thrw(u_store.excuse());
             }
-            return toCertificates(u_store.value(), withChain);
+            return toCertificatesFromKeyStore(u_store.value(), withChain);
         }, e -> TGS_UnionExcuse.ofExcuse(e));
     }
 
@@ -148,7 +148,7 @@ public class TS_NetworkSSLUtils {
         }, e -> TGS_UnionExcuse.ofExcuse(e));
     }
 
-    public static TGS_UnionExcuse<List<Certificate>> toCertificates(KeyStore store, boolean withChain) {
+    public static TGS_UnionExcuse<List<Certificate>> toCertificatesFromKeyStore(KeyStore store, boolean withChain) {
         return TGS_UnSafe.call(() -> {
             List<Certificate> certificates = new ArrayList();
             var aliases = TGS_StreamUtils.of(store.aliases()).toList();
