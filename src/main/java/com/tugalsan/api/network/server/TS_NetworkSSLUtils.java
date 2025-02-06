@@ -133,7 +133,9 @@ public class TS_NetworkSSLUtils {
     public static TGS_UnionExcuse<KeyStore> toKeyStoreFromP12(Path p12, CharSequence pass) {
         return TGS_UnSafe.call(() -> {
             var store = KeyStore.getInstance("PKCS12");
-            store.load(Files.newInputStream(p12), pass.toString().toCharArray());
+            try (var is = Files.newInputStream(p12)) {
+                store.load(is, pass.toString().toCharArray());
+            }
             return TGS_UnionExcuse.of(store);
         }, e -> TGS_UnionExcuse.ofExcuse(e));
     }
