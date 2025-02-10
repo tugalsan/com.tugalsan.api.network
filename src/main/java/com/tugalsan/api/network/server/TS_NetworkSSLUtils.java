@@ -1,13 +1,12 @@
 package com.tugalsan.api.network.server;
 
-import com.tugalsan.api.function.client.TGS_Func;
 import com.tugalsan.api.log.server.TS_Log;
 import com.tugalsan.api.network.server.core.TS_NetworkCoreDirectoryUtils;
 import com.tugalsan.api.network.server.core.TS_NetworkCorePemImporterUtils;
 import com.tugalsan.api.stream.client.TGS_StreamUtils;
 import com.tugalsan.api.time.client.TGS_Time;
 import com.tugalsan.api.union.client.TGS_UnionExcuse;
-import com.tugalsan.api.unsafe.client.*;
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -18,6 +17,9 @@ import java.security.*;
 import java.security.cert.*;
 import java.security.cert.Certificate;
 import java.util.*;
+import com.tugalsan.api.function.client.maythrow.uncheckedexceptions.TGS_FuncMTUCE;
+import com.tugalsan.api.function.client.maythrow.checkedexceptions.TGS_FuncMTCEUtils;
+import com.tugalsan.api.function.client.maythrow.uncheckedexceptions.TGS_FuncMTUCEUtils;
 
 public class TS_NetworkSSLUtils {
 
@@ -86,7 +88,7 @@ public class TS_NetworkSSLUtils {
     }
 
     public static TGS_UnionExcuse<List<Certificate>> toCertificatesFromDer(Path derCert) {
-        return TGS_UnSafe.call(() -> {
+        return TGS_FuncMTCEUtils.call(() -> {
             List<Certificate> certificates = new ArrayList();
             try (var is = new BufferedInputStream(Files.newInputStream(derCert))) {
                 var cf = CertificateFactory.getInstance("X.509");
@@ -100,38 +102,38 @@ public class TS_NetworkSSLUtils {
     }
 
     public static TGS_UnionExcuse<List<Certificate>> toCertificatesFromPem(Path pemCert) {
-        return TGS_UnSafe.call(() -> {
+        return TGS_FuncMTCEUtils.call(() -> {
             var certififactes = TS_NetworkCorePemImporterUtils.createCertificates(pemCert.toFile());
             return TGS_UnionExcuse.of(Arrays.asList(certififactes));
         }, e -> TGS_UnionExcuse.ofExcuse(e));
     }
 
     public static TGS_UnionExcuse<List<Certificate>> toCertificatesFromP12(Path p12, CharSequence pass, boolean withChain) {
-        return TGS_UnSafe.call(() -> {
+        return TGS_FuncMTCEUtils.call(() -> {
             var u_store = toKeyStoreFromP12(p12, pass);
             if (u_store.isExcuse()) {
-                TGS_UnSafe.thrw(u_store.excuse());
+                TGS_FuncMTUCEUtils.thrw(u_store.excuse());
             }
             return toCertificatesFromKeyStore(u_store.value(), withChain);
         }, e -> TGS_UnionExcuse.ofExcuse(e));
     }
 
     public static TGS_UnionExcuse<SSLServerSocketFactory> toSSLServerSocketFactoryFromPEM(Path pemPrivateKey, Path pemCert, CharSequence pass) {
-        return TGS_UnSafe.call(() -> {
+        return TGS_FuncMTCEUtils.call(() -> {
             var store = TS_NetworkCorePemImporterUtils.createSSLFactory(pemPrivateKey.toFile(), pemCert.toFile(), pass.toString());
             return TGS_UnionExcuse.of(store);
         }, e -> TGS_UnionExcuse.ofExcuse(e));
     }
 
     public static TGS_UnionExcuse<KeyStore> toKeyStoreFromPEM(Path pemPrivateKey, Path pemCert, CharSequence pass) {
-        return TGS_UnSafe.call(() -> {
+        return TGS_FuncMTCEUtils.call(() -> {
             var store = TS_NetworkCorePemImporterUtils.createKeyStore(pemPrivateKey.toFile(), pemCert.toFile(), pass.toString());
             return TGS_UnionExcuse.of(store);
         }, e -> TGS_UnionExcuse.ofExcuse(e));
     }
 
     public static TGS_UnionExcuse<KeyStore> toKeyStoreFromP12(Path p12, CharSequence pass) {
-        return TGS_UnSafe.call(() -> {
+        return TGS_FuncMTCEUtils.call(() -> {
             var store = KeyStore.getInstance("PKCS12");
             try (var is = Files.newInputStream(p12)) {
                 store.load(is, pass.toString().toCharArray());
@@ -141,17 +143,17 @@ public class TS_NetworkSSLUtils {
     }
 
     public static TGS_UnionExcuse<PrivateKey> toPrivateKey(KeyStore store, CharSequence pass) {
-        return TGS_UnSafe.call(() -> {
+        return TGS_FuncMTCEUtils.call(() -> {
             var privateKey = (PrivateKey) store.getKey("example", pass.toString().toCharArray());
             if (privateKey == null) {
-                TGS_UnSafe.thrw(new NullPointerException("no private key exists"));
+                TGS_FuncMTUCEUtils.thrw(new NullPointerException("no private key exists"));
             }
             return TGS_UnionExcuse.of(privateKey);
         }, e -> TGS_UnionExcuse.ofExcuse(e));
     }
 
     public static TGS_UnionExcuse<List<Certificate>> toCertificatesFromKeyStore(KeyStore store, boolean withChain) {
-        return TGS_UnSafe.call(() -> {
+        return TGS_FuncMTCEUtils.call(() -> {
             List<Certificate> certificates = new ArrayList();
             var aliases = TGS_StreamUtils.of(store.aliases()).toList();
             for (var alias : aliases) {
@@ -177,7 +179,7 @@ public class TS_NetworkSSLUtils {
 
     //https://mkyong.com/java/java-https-client-httpsurlconnection-example/
     public static TGS_UnionExcuse<StringBuffer> info(HttpsURLConnection con) {
-        return TGS_UnSafe.call(() -> {
+        return TGS_FuncMTCEUtils.call(() -> {
             var sb = new StringBuffer();
             sb.append("\nResponse Code : ").append(con.getResponseCode());
             sb.append("\nCipher Suite : ").append(con.getCipherSuite());
@@ -196,7 +198,7 @@ public class TS_NetworkSSLUtils {
     }
 
     public static void disableCertificateValidation() {
-        TGS_UnSafe.run(() -> {
+        TGS_FuncMTCEUtils.run(() -> {
             var sc = SSLContext.getInstance("SSL");
             sc.init(null, new TrustManager[]{
                 new X509TrustManager() {
@@ -216,6 +218,6 @@ public class TS_NetworkSSLUtils {
             }, new SecureRandom());
             HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
             HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
-        }, e -> TGS_Func.empty.run());
+        }, e -> TGS_FuncMTUCE.empty.run());
     }
 }

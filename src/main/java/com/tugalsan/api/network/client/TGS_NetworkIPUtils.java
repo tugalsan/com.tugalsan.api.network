@@ -1,6 +1,7 @@
 package com.tugalsan.api.network.client;
 
-import com.tugalsan.api.unsafe.client.*;
+
+import com.tugalsan.api.function.client.maythrow.checkedexceptions.TGS_FuncMTCEUtils;
 import java.util.*;
 
 public class TGS_NetworkIPUtils {
@@ -13,7 +14,7 @@ public class TGS_NetworkIPUtils {
         if (groups.length != 4) {
             return false;
         }
-        return TGS_UnSafe.call(() -> Arrays.stream(groups)
+        return TGS_FuncMTCEUtils.call(() -> Arrays.stream(groups)
                 .filter(s -> s.length() > 1 && s.startsWith("0"))
                 .map(Integer::parseInt)
                 .filter(i -> (i >= 0 && i <= 255))

@@ -1,18 +1,20 @@
 package com.tugalsan.api.network.server;
 
-import com.tugalsan.api.function.client.TGS_Func_OutTyped_In1;
+import com.tugalsan.api.function.client.maythrow.uncheckedexceptions.TGS_FuncMTUCE_OutTyped_In1;
 import com.tugalsan.api.charset.client.TGS_CharSetCast;
+import com.tugalsan.api.function.client.maythrow.checkedexceptions.TGS_FuncMTCEUtils;
+import com.tugalsan.api.function.client.maythrow.uncheckedexceptions.TGS_FuncMTUCEUtils;
 import com.tugalsan.api.log.server.*;
 import com.tugalsan.api.network.client.TGS_NetworkIPUtils;
 import com.tugalsan.api.os.server.TS_OsProcess;
 import com.tugalsan.api.stream.client.TGS_StreamUtils;
 import com.tugalsan.api.string.client.*;
-import com.tugalsan.api.thread.server.async.TS_ThreadAsyncAwait;
+import com.tugalsan.api.thread.server.async.await.TS_ThreadAsyncAwait;
 import com.tugalsan.api.thread.server.sync.TS_ThreadSyncTrigger;
 import com.tugalsan.api.tuple.client.TGS_Tuple1;
 import com.tugalsan.api.union.client.TGS_UnionExcuse;
 import com.tugalsan.api.union.client.TGS_UnionExcuseVoid;
-import com.tugalsan.api.unsafe.client.*;
+
 import java.net.*;
 import java.time.Duration;
 import java.util.*;
@@ -39,7 +41,7 @@ public class TS_NetworkIPUtils {
         return 10;
     }
 
-    private static class TaskIsReacable implements TGS_Func_OutTyped_In1<TGS_UnionExcuse<String>, TS_ThreadSyncTrigger> {
+    private static class TaskIsReacable implements TGS_FuncMTUCE_OutTyped_In1<TGS_UnionExcuse<String>, TS_ThreadSyncTrigger> {
 
         private final String ipAddress;
         private final int watchDogSeconds;
@@ -64,7 +66,7 @@ public class TS_NetworkIPUtils {
 
     public static List<String> getReachables(CharSequence ipClassC, TS_ThreadSyncTrigger threadKiller) {
         var threadUntil = Duration.ofSeconds(2 * (long) MAX_TIMEOUT_SEC() * (MAX_IP() - MIN_IP()));
-        List<TGS_Func_OutTyped_In1<TGS_UnionExcuse<String>, TS_ThreadSyncTrigger>> taskList = TGS_StreamUtils.toLst(
+        List<TGS_FuncMTUCE_OutTyped_In1<TGS_UnionExcuse<String>, TS_ThreadSyncTrigger>> taskList = TGS_StreamUtils.toLst(
                 IntStream.range(MIN_IP(), MAX_IP())
                         .mapToObj(ipPartD -> TGS_StringUtils.cmn().concat(ipClassC, ".", String.valueOf(ipPartD)))
                         .map(ipNext -> new TaskIsReacable(ipNext, MAX_TIMEOUT_SEC()))
@@ -98,7 +100,7 @@ public class TS_NetworkIPUtils {
 //            }
 //        }
 //    public static List<String> getReachables(CharSequence ipClassC, boolean useVirtualThread) {
-//        return TGS_UnSafe.call(() -> {
+//        return TGS_FuncMTCEUtils.call(() -> {
 //            List<TaskIsReacable> taskList = TGS_ListUtils.of();
 //            IntStream.range(MIN_IP(), MAX_IP()).forEachOrdered(ipPartD -> {
 //                var ipNext = TGS_StringUtils.cmn().concat(ipClassC, ".", String.valueOf(ipPartD));
@@ -111,7 +113,7 @@ public class TS_NetworkIPUtils {
 //            executor.shutdown();
 //            List<String> results = TGS_ListUtils.of();
 //            futures.stream().forEachOrdered(f -> {
-//                TGS_UnSafe.run(() -> {
+//                TGS_FuncMTCEUtils.run(() -> {
 //                    if (f.get() == null) {
 //                        return;
 //                    }
@@ -126,7 +128,7 @@ public class TS_NetworkIPUtils {
     }
 
     public static TGS_UnionExcuseVoid isReacable(CharSequence ipAddress, int watchDogSeconds) {
-        return TGS_UnSafe.call(() -> {
+        return TGS_FuncMTCEUtils.call(() -> {
             var u = getByName(ipAddress);
             if (u.isExcuse()) {
                 return u.toExcuseVoid();
@@ -140,7 +142,7 @@ public class TS_NetworkIPUtils {
     }
 
     public static TGS_UnionExcuse<InetAddress> getByName(CharSequence ipAddress) {
-        return TGS_UnSafe.call(() -> TGS_UnionExcuse.of(InetAddress.getByName(ipAddress.toString())), e -> {
+        return TGS_FuncMTCEUtils.call(() -> TGS_UnionExcuse.of(InetAddress.getByName(ipAddress.toString())), e -> {
             return TGS_UnionExcuse.ofExcuse(e);
         });
     }
@@ -153,7 +155,7 @@ public class TS_NetworkIPUtils {
         if (osName.startsWith("linux")) {
             return TS_OsProcess.of("ifconfig").output;
         }
-        return TGS_UnSafe.thrw(d.className, "get_IP_CONFIG_ALL", "UnknownOs: " + System.getProperty("os.name"));
+        return TGS_FuncMTUCEUtils.thrw(d.className, "get_IP_CONFIG_ALL", "UnknownOs: " + System.getProperty("os.name"));
     }
 
     public static boolean is_ip_localHost_loopBack(String ip) {
@@ -206,7 +208,7 @@ public class TS_NetworkIPUtils {
     }
 
     public static TGS_UnionExcuse<List<String>> getIpList_usingNetworkInterfaces() {
-        return TGS_UnSafe.call(() -> {
+        return TGS_FuncMTCEUtils.call(() -> {
             List<String> ips = new ArrayList();
             var e = NetworkInterface.getNetworkInterfaces();
             while (e.hasMoreElements()) {
@@ -223,14 +225,14 @@ public class TS_NetworkIPUtils {
     }
 
     public static TGS_UnionExcuse<String> getIpList_usingInetAddress() {
-        return TGS_UnSafe.call(() -> {
+        return TGS_FuncMTCEUtils.call(() -> {
             var ip = InetAddress.getLocalHost();
             return TGS_UnionExcuse.of(ip.getHostAddress());
         });
     }
 
     public static TGS_UnionExcuse<String> getIpList_usingInetSocketAddress() {
-        return TGS_UnSafe.call(() -> {
+        return TGS_FuncMTCEUtils.call(() -> {
             try (var socket = new Socket()) {
                 socket.connect(new InetSocketAddress("google.com", 80));
                 var ip = socket.getLocalAddress().toString();
@@ -260,7 +262,7 @@ public class TS_NetworkIPUtils {
     }
 
     public static TGS_UnionExcuse<TS_NetworkIPs> getIPs() {
-        return TGS_UnSafe.call(() -> {
+        return TGS_FuncMTCEUtils.call(() -> {
             var u_ipAll = getIpList_usingAll();
             if (u_ipAll.isExcuse()) {
                 return u_ipAll.toExcuse();
@@ -300,7 +302,7 @@ public class TS_NetworkIPUtils {
     }
 
     public static TGS_UnionExcuse<String> getIPClient(HttpServletRequest request) {
-        return TGS_UnSafe.call(() -> {
+        return TGS_FuncMTCEUtils.call(() -> {
             var r = request.getRemoteAddr();
             if (TGS_NetworkIPUtils.isLocalHost(r)) {
                 r = InetAddress.getLocalHost().getHostAddress();
