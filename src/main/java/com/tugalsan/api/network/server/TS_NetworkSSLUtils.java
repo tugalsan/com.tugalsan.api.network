@@ -178,9 +178,9 @@ public class TS_NetworkSSLUtils {
     }
 
     //https://mkyong.com/java/java-https-client-httpsurlconnection-example/
-    public static TGS_UnionExcuse<StringBuffer> info(HttpsURLConnection con) {
+    public static TGS_UnionExcuse<StringBuilder> info(HttpsURLConnection con) {
         return TGS_FuncMTCEUtils.call(() -> {
-            var sb = new StringBuffer();
+            var sb = new StringBuilder();
             sb.append("\nResponse Code : ").append(con.getResponseCode());
             sb.append("\nCipher Suite : ").append(con.getCipherSuite());
             sb.append("\n\n");
