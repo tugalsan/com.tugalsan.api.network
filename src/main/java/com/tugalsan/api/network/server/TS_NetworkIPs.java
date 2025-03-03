@@ -12,15 +12,15 @@ public record TS_NetworkIPs(
         List<String> ip_other) {
 
     public boolean ip_other_contains(String ipTarget) {
-        return ip_other.stream().filter(ipSource -> Objects.equals(ipSource, ipTarget)).findAny().isPresent();
+        return ip_other.stream().anyMatch(ipSource -> Objects.equals(ipSource, ipTarget));
     }
 
     public boolean ip_localNetwork_contains(String ipTarget) {
-        return ip_localNetwork.stream().filter(ipSource -> Objects.equals(ipSource, ipTarget)).findAny().isPresent();
+        return ip_localNetwork.stream().anyMatch(ipSource -> Objects.equals(ipSource, ipTarget));
     }
 
     public boolean ip_multiCast_contains(String ipTarget) {
-        return ip_multiCast.stream().filter(ipSource -> Objects.equals(ipSource, ipTarget)).findAny().isPresent();
+        return ip_multiCast.stream().anyMatch(ipSource -> Objects.equals(ipSource, ipTarget));
     }
 
     public boolean ip_broadCast_contains(String ipTarget) {

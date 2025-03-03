@@ -251,11 +251,11 @@ public class TS_NetworkIPUtils {
         }
         var lst = inter.value();
         var soc = getIpList_usingInetSocketAddress();
-        if (soc.isPresent() && lst.stream().filter(o -> o.equals(soc.value())).findAny().isEmpty()) {
+        if (soc.isPresent() && lst.stream().noneMatch(o -> o.equals(soc.value()))) {
             inter.value().add(soc.value());
         }
         var inet = getIpList_usingInetAddress();
-        if (inet.isPresent() && lst.stream().filter(o -> o.equals(inet.value())).findAny().isEmpty()) {
+        if (inet.isPresent() && lst.stream().noneMatch(o -> o.equals(inet.value()))) {
             inter.value().add(inet.value());
         }
         return inter;
