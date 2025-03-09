@@ -71,7 +71,7 @@ public class TS_NetworkIPUtils {
                         .mapToObj(ipPartD -> TGS_StringUtils.cmn().concat(ipClassC, ".", String.valueOf(ipPartD)))
                         .map(ipNext -> new TaskIsReacable(ipNext, MAX_TIMEOUT_SEC()))
         );
-        var await = TS_ThreadAsyncAwait.callParallelRateLimited(threadKiller, MAX_THREAD_COUNT(), threadUntil, taskList);
+        var await = TS_ThreadAsyncAwait.callParallelRateLimited(threadKiller.newChild(d.className), MAX_THREAD_COUNT(), threadUntil, taskList);
         return TGS_StreamUtils.toLst(
                 await.resultsForSuccessfulOnes.stream()
                         .filter(r -> r.isPresent())
