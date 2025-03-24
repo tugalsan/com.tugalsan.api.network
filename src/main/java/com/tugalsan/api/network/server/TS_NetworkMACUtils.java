@@ -1,6 +1,6 @@
 package com.tugalsan.api.network.server;
 
-import com.tugalsan.api.function.client.maythrow.checkedexceptions.TGS_FuncMTCEUtils;
+import com.tugalsan.api.function.client.maythrowexceptions.checked.TGS_FuncMTCUtils;
 import com.tugalsan.api.list.client.*;
 
 import java.net.*;
@@ -9,7 +9,7 @@ import java.util.*;
 public class TS_NetworkMACUtils {
 
     public static List<String> getMAC_FromNetworkInterface() {
-        return TGS_FuncMTCEUtils.call(() -> {
+        return TGS_FuncMTCUtils.call(() -> {
             List<String> macs = TGS_ListUtils.of();
             var networks = NetworkInterface.getNetworkInterfaces();
             while (networks.hasMoreElements()) {

@@ -1,7 +1,7 @@
 package com.tugalsan.api.network.server;
 
-import com.tugalsan.api.function.client.maythrow.checkedexceptions.TGS_FuncMTCEUtils;
-import com.tugalsan.api.function.client.maythrow.uncheckedexceptions.TGS_FuncMTUCE_OutTyped_In1;
+import com.tugalsan.api.function.client.maythrowexceptions.checked.TGS_FuncMTCUtils;
+import com.tugalsan.api.function.client.maythrowexceptions.unchecked.TGS_FuncMTU_OutTyped_In1;
 import com.tugalsan.api.log.server.TS_Log;
 import com.tugalsan.api.stream.client.TGS_StreamUtils;
 import com.tugalsan.api.thread.server.async.await.TS_ThreadAsyncAwait;
@@ -34,7 +34,7 @@ public class TS_NetworkPortUtils {
         return 0.4f;
     }
 
-    private static class TaskIsReacable implements TGS_FuncMTUCE_OutTyped_In1<TGS_UnionExcuse<Integer>, TS_ThreadSyncTrigger> {
+    private static class TaskIsReacable implements TGS_FuncMTU_OutTyped_In1<TGS_UnionExcuse<Integer>, TS_ThreadSyncTrigger> {
 
         private final String ipAddress;
         private final int port;
@@ -61,7 +61,7 @@ public class TS_NetworkPortUtils {
 
     public static List<Integer> getReachables(CharSequence ip, TS_ThreadSyncTrigger threadKiller) {
         var threadUntil = Duration.ofSeconds(2 * (long) MAX_TIMEOUT_SEC() * (MAX_PORT() - MIN_PORT()));
-        List<TGS_FuncMTUCE_OutTyped_In1<TGS_UnionExcuse<Integer>, TS_ThreadSyncTrigger>> taskList = TGS_StreamUtils.toLst(
+        List<TGS_FuncMTU_OutTyped_In1<TGS_UnionExcuse<Integer>, TS_ThreadSyncTrigger>> taskList = TGS_StreamUtils.toLst(
                 IntStream.range(MIN_PORT(), MAX_PORT())
                         .mapToObj(port -> new TaskIsReacable(ip, port, MAX_TIMEOUT_SEC()))
         );
@@ -96,7 +96,7 @@ public class TS_NetworkPortUtils {
 //            }
 //        }
 //    public static List<Integer> getReachables(CharSequence ip, boolean useVirtualThread) {
-//        return TGS_FuncMTCEUtils.call(() -> {
+//        return TGS_FuncMTCUtils.call(() -> {
 //            List<TaskIsReacable> taskList = TGS_ListUtils.of();
 //            IntStream.range(MIN_PORT(), MAX_PORT()).forEachOrdered(port -> taskList.add(new TaskIsReacable(ip, port, MAX_TIMEOUT_SEC())));
 //            var executor = useVirtualThread
@@ -106,7 +106,7 @@ public class TS_NetworkPortUtils {
 //            executor.shutdown();
 //            List<Integer> results = TGS_ListUtils.of();
 //            futures.stream().forEachOrdered(f -> {
-//                TGS_FuncMTCEUtils.run(() -> {
+//                TGS_FuncMTCUtils.run(() -> {
 //                    var port = f.get();
 //                    if (port != null) {
 //                        results.add(port);
@@ -117,7 +117,7 @@ public class TS_NetworkPortUtils {
 //        });
 //    }
     public static TGS_UnionExcuseVoid isReacable(CharSequence ip, int port, float watchDogSeconds) {
-        return TGS_FuncMTCEUtils.call(() -> {
+        return TGS_FuncMTCUtils.call(() -> {
             try (var socket = new Socket();) {
                 socket.connect(new InetSocketAddress(ip.toString(), port), Math.round(watchDogSeconds * 1000));
                 return TGS_UnionExcuseVoid.ofVoid();

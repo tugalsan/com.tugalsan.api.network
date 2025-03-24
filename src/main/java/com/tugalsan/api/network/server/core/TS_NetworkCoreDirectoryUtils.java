@@ -1,8 +1,8 @@
 package com.tugalsan.api.network.server.core;
 
 import com.tugalsan.api.charset.client.TGS_CharSetCast;
-import com.tugalsan.api.function.client.maythrow.checkedexceptions.TGS_FuncMTCEUtils;
-import com.tugalsan.api.function.client.maythrow.uncheckedexceptions.TGS_FuncMTUCEUtils;
+import com.tugalsan.api.function.client.maythrowexceptions.checked.TGS_FuncMTCUtils;
+import com.tugalsan.api.function.client.maythrowexceptions.unchecked.TGS_FuncMTUUtils;
 import java.util.*;
 import java.nio.file.*;
 import com.tugalsan.api.list.client.*;
@@ -18,7 +18,7 @@ public class TS_NetworkCoreDirectoryUtils {
     public static Path assureExists(Path path) {
         TS_NetworkCoreDirectoryUtils.createDirectoriesIfNotExists(path);
         if (!TS_NetworkCoreDirectoryUtils.isExistDirectory(path)) {
-            TGS_FuncMTUCEUtils.thrw(d.className, "assureExists", "!TS_DirectoryUtils.isExistDirectory(path)");
+            TGS_FuncMTUUtils.thrw(d.className, "assureExists", "!TS_DirectoryUtils.isExistDirectory(path)");
         }
         return path;
     }
@@ -28,7 +28,7 @@ public class TS_NetworkCoreDirectoryUtils {
     }
 
     public static TGS_UnionExcuseVoid createDirectoriesIfNotExists(Path directory) {
-        return TGS_FuncMTCEUtils.call(() -> {
+        return TGS_FuncMTCUtils.call(() -> {
             if (!isExistDirectory(directory)) {
                 directory.toFile().mkdirs();
                 //return Files.createDirectories(directory);//BUGGY
@@ -48,7 +48,7 @@ public class TS_NetworkCoreDirectoryUtils {
 
     //DONT TOUCH: ARRAYLIST<PATH> DOES NOT WORKING, DONT KNOW WHY!!
     public static List<String> subFiles2(Path parentDirectory, CharSequence fileNameMatcher, boolean sorted, boolean recursive) {
-        return TGS_FuncMTCEUtils.call(() -> {
+        return TGS_FuncMTCUtils.call(() -> {
             assureExists(parentDirectory);
             List<String> subFiles;
             if (fileNameMatcher == null) {
