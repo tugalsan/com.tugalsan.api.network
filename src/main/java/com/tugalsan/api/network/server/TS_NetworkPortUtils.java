@@ -67,7 +67,7 @@ public class TS_NetworkPortUtils {
         );
         var await = TS_ThreadAsyncAwait.callParallelRateLimited(threadKiller.newChild(d.className), MAX_THREAD_COUNT(), threadUntil, taskList);
         return TGS_StreamUtils.toLst(
-                await.resultsForSuccessfulOnes.stream()
+                await.resultsSuccessful().stream()
                         .filter(r -> r.isPresent())
                         .map(r -> r.value())
         );
