@@ -65,7 +65,7 @@ public class TS_NetworkPortUtils {
                 IntStream.range(MIN_PORT(), MAX_PORT())
                         .mapToObj(port -> new TaskIsReacable(ip, port, MAX_TIMEOUT_SEC()))
         );
-        var await = TS_ThreadAsyncAwait.callParallelRateLimited(threadKiller.newChild(d.className), MAX_THREAD_COUNT(), threadUntil, taskList);
+        var await = TS_ThreadAsyncAwait.callParallelRateLimited(threadKiller.newChild(d.className()), MAX_THREAD_COUNT(), threadUntil, taskList);
         return TGS_StreamUtils.toLst(
                 await.resultsSuccessful().stream()
                         .filter(r -> r.isPresent())

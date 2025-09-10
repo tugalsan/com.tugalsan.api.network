@@ -18,7 +18,7 @@ public class TS_NetworkCoreDirectoryUtils {
     public static Path assureExists(Path path) {
         TS_NetworkCoreDirectoryUtils.createDirectoriesIfNotExists(path);
         if (!TS_NetworkCoreDirectoryUtils.isExistDirectory(path)) {
-            TGS_FuncMTUUtils.thrw(d.className, "assureExists", "!TS_DirectoryUtils.isExistDirectory(path)");
+            TGS_FuncMTUUtils.thrw(d.className(), "assureExists", "!TS_DirectoryUtils.isExistDirectory(path)");
         }
         return path;
     }

@@ -71,7 +71,7 @@ public class TS_NetworkIPUtils {
                         .mapToObj(ipPartD -> TGS_StringUtils.cmn().concat(ipClassC, ".", String.valueOf(ipPartD)))
                         .map(ipNext -> new TaskIsReacable(ipNext, MAX_TIMEOUT_SEC()))
         );
-        var await = TS_ThreadAsyncAwait.callParallelRateLimited(threadKiller.newChild(d.className), MAX_THREAD_COUNT(), threadUntil, taskList);
+        var await = TS_ThreadAsyncAwait.callParallelRateLimited(threadKiller.newChild(d.className()), MAX_THREAD_COUNT(), threadUntil, taskList);
         return TGS_StreamUtils.toLst(
                 await.resultsSuccessful().stream()
                         .filter(r -> r.isPresent())
@@ -135,7 +135,7 @@ public class TS_NetworkIPUtils {
             }
             var result = u.value().isReachable(watchDogSeconds * 1000);
             if (!result) {
-                return TGS_UnionExcuseVoid.ofExcuse(d.className, "isReacable", "result is false");
+                return TGS_UnionExcuseVoid.ofExcuse(d.className(), "isReacable", "result is false");
             }
             return TGS_UnionExcuseVoid.ofVoid();
         }, e -> TGS_UnionExcuseVoid.ofExcuse(e));
@@ -155,7 +155,7 @@ public class TS_NetworkIPUtils {
         if (osName.startsWith("linux")) {
             return TS_OsProcess.of("ifconfig").output;
         }
-        return TGS_FuncMTUUtils.thrw(d.className, "get_IP_CONFIG_ALL", "UnknownOs: " + System.getProperty("os.name"));
+        return TGS_FuncMTUUtils.thrw(d.className(), "get_IP_CONFIG_ALL", "UnknownOs: " + System.getProperty("os.name"));
     }
 
     public static boolean is_ip_localHost_loopBack(String ip) {
