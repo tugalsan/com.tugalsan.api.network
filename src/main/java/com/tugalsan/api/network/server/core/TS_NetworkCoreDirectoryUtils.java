@@ -1,15 +1,13 @@
 package com.tugalsan.api.network.server.core;
 
-import com.tugalsan.api.charset.client.TGS_CharSetCast;
-import com.tugalsan.api.function.client.maythrowexceptions.checked.TGS_FuncMTCUtils;
-import com.tugalsan.api.function.client.maythrowexceptions.unchecked.TGS_FuncMTUUtils;
+import module com.tugalsan.api.charset;
+import module com.tugalsan.api.list;
+import module com.tugalsan.api.log;
+import module com.tugalsan.api.stream;
+import module com.tugalsan.api.union;
+import module com.tugalsan.api.function;
 import java.util.*;
 import java.nio.file.*;
-import com.tugalsan.api.list.client.*;
-import com.tugalsan.api.log.server.*;
-import com.tugalsan.api.stream.client.*;
-import com.tugalsan.api.union.client.TGS_UnionExcuseVoid;
-
 
 public class TS_NetworkCoreDirectoryUtils {
 

@@ -1,28 +1,14 @@
 package com.tugalsan.api.network.server.core;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.security.KeyFactory;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.ArrayList;
+import module java.xml.bind;
+import java.io.*;
+import java.security.*;
+import java.security.cert.*;
+import java.security.interfaces.*;
+import java.security.spec.*;
+import javax.net.ssl.*;
+import java.util.*;
 import java.util.List;
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLServerSocketFactory;
-import javax.xml.bind.DatatypeConverter;
 
 //SOURCE https://stackoverflow.com/questions/2138940/import-pem-into-java-key-store
 public class TS_NetworkCorePemImporterUtils {

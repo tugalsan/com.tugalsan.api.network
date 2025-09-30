@@ -1,22 +1,17 @@
 package com.tugalsan.api.network.server;
 
-import com.tugalsan.api.function.client.maythrowexceptions.unchecked.TGS_FuncMTU_OutTyped_In1;
-import com.tugalsan.api.charset.client.TGS_CharSetCast;
-import com.tugalsan.api.function.client.maythrowexceptions.checked.TGS_FuncMTCUtils;
-import com.tugalsan.api.function.client.maythrowexceptions.unchecked.TGS_FuncMTUUtils;
-import com.tugalsan.api.log.server.*;
-import com.tugalsan.api.network.client.TGS_NetworkIPUtils;
-import com.tugalsan.api.os.server.TS_OsProcess;
-import com.tugalsan.api.stream.client.TGS_StreamUtils;
-import com.tugalsan.api.string.client.*;
-import com.tugalsan.api.thread.server.async.await.TS_ThreadAsyncAwait;
-import com.tugalsan.api.thread.server.sync.TS_ThreadSyncTrigger;
-import com.tugalsan.api.tuple.client.TGS_Tuple1;
-import com.tugalsan.api.union.client.TGS_UnionExcuse;
-import com.tugalsan.api.union.client.TGS_UnionExcuseVoid;
-
-import java.net.*;
+import module com.tugalsan.api.function;
+import module com.tugalsan.api.charset;
+import module com.tugalsan.api.log;
+import module com.tugalsan.api.network;
+import module com.tugalsan.api.os;
+import module com.tugalsan.api.stream;
+import module com.tugalsan.api.string;
+import module com.tugalsan.api.thread;
+import module com.tugalsan.api.tuple;
+import module com.tugalsan.api.union;
 import java.time.Duration;
+import java.net.*;
 import java.util.*;
 import java.util.stream.*;
 import javax.servlet.http.*;
@@ -268,7 +263,7 @@ public class TS_NetworkIPUtils {
                 return u_ipAll.toExcuse();
             }
             TGS_Tuple1<String> ip_localHost_loopBack = TGS_Tuple1.of();
-            TGS_Tuple1<String> ip_broadCast = TGS_Tuple1.of(); 
+            TGS_Tuple1<String> ip_broadCast = TGS_Tuple1.of();
             List<String> ip_multiCast = new ArrayList();
             List<String> ip_localNetwork = new ArrayList();
             List<String> ip_other = new ArrayList();

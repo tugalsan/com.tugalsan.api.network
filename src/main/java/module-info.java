@@ -1,9 +1,9 @@
 module com.tugalsan.api.network {
+    //requires java.xml;
     requires java.xml.bind;
     requires javax.servlet.api;
     requires jcifs;
-    requires com.tugalsan.api.os;
-    
+    requires com.tugalsan.api.os;    
     requires com.tugalsan.api.time;
     requires com.tugalsan.api.string;
     requires com.tugalsan.api.tuple;

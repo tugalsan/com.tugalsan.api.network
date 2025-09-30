@@ -1,8 +1,7 @@
 package com.tugalsan.api.network.server;
 
-import com.tugalsan.api.function.client.maythrowexceptions.checked.TGS_FuncMTCUtils;
-import com.tugalsan.api.list.client.*;
-
+import module com.tugalsan.api.function;
+import module com.tugalsan.api.list;
 import java.net.*;
 import java.util.*;
 

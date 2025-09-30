@@ -1,12 +1,11 @@
 package com.tugalsan.api.network.server;
 
-import com.tugalsan.api.stream.client.TGS_StreamUtils;
-import com.tugalsan.api.union.client.TGS_UnionExcuse;
-import com.tugalsan.api.function.client.maythrowexceptions.checked.TGS_FuncMTCUtils;
-import java.net.URLConnection;
-import java.util.Arrays;
-import java.util.List;
-import jcifs.context.SingletonContext;
+import module com.tugalsan.api.stream;
+import module com.tugalsan.api.union;
+import module com.tugalsan.api.function;
+import module jcifs;
+import java.net.*;
+import java.util.*;
 import jcifs.smb.NtlmPasswordAuthentication;
 import jcifs.smb.SmbFile;
 
