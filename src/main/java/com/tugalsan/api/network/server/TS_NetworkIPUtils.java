@@ -10,11 +10,11 @@ import module com.tugalsan.api.string;
 import module com.tugalsan.api.thread;
 import module com.tugalsan.api.tuple;
 import module com.tugalsan.api.union;
+import module javax.servlet.api;
 import java.time.*;
 import java.net.*;
 import java.util.*;
 import java.util.stream.*;
-import javax.servlet.http.*;
 
 public class TS_NetworkIPUtils {
 
